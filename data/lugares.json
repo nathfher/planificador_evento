@@ -1,0 +1,38 @@
+[
+    {
+        "id_lugar": 1,
+        "nombre": "Jardín de los Cerezos",
+        "capacidad": 150,
+        "costo": 2500,
+        "servicios_incluidos": [
+            "Fuente de agua iluminada",
+            "Pérgola de ceremonias",
+            "Iluminación ambiental en árboles"
+        ],
+        "fechas_ocupadas": []
+    },
+    {
+        "id_lugar": 2,
+        "nombre": "Palacio de Cristal",
+        "capacidad": 300,
+        "costo": 5500,
+        "servicios_incluidos": [
+            "Aire acondicionado central",
+            "Escenario para orquesta",
+            "Suite para los novios"
+        ],
+        "fechas_ocupadas": []
+    },
+    {
+        "id_lugar": 3,
+        "nombre": "Terraza del Sol",
+        "capacidad": 80,
+        "costo": 1500,
+        "servicios_incluidos": [
+            "Iluminación Guirnalda (Fairytale Lights)",
+            "Pista de baile de ristal sobre la piscina",
+            "Fogata Lounge con asientos de cuero"
+        ],
+        "fechas_ocupadas": []
+    }
+]

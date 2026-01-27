@@ -1,0 +1,268 @@
+import funciones_generales as fg
+from datetime import datetime, timedelta
+from modulos import Cliente, Personal, ItemReserva
+
+def ejecutar_registro_boda():
+    fg.limpiar_pantalla()
+    print("==========================================")
+    print("   BIENVENIDO AL SISTEMA WEDDING PLANNER  ")
+    print("==========================================\n")
+
+    # 1. CARGAR DATOS
+    lista_lugares = fg.ensure_file_exist('lugares.json', [])
+    lista_personal = fg.ensure_file_exist('personal.json', [])
+    lista_inventario = fg.ensure_file_exist('inventario.json', [])
+    lista_clientes = fg.ensure_file_exist("clientes.json", [])
+    lista_catering = fg.ensure_file_exist('catering.json', [])
+    lista_musica = fg.ensure_file_exist('musica.json', [])
+
+    if not lista_lugares:
+        print("❌ ERROR CRÍTICO: No se puede planear una boda sin lugares en la base de datos.")
+        return
+
+    print("✅ Bases de datos cargadas correctamente.")
+    input("\nPresione Enter para comenzar el registro...")
+
+    # --- PASO 1: REGISTRO DEL CLIENTE ---
+    fg.limpiar_pantalla()
+    print("--- PASO 1: REGISTRO DEL CLIENTE ---")
+
+    id_cliente = input("Ingrese el ID único del cliente: ")
+    nombre_usuario = input("Ingrese el nombre completo del cliente: ")
+
+    while True:
+        correo_temp = input("Ingrese el correo electrónico: ")
+        if "@" in correo_temp:
+            correo_usuario = correo_temp
+            break
+        print("❌ ¡Correo inválido! Debe contener un símbolo '@'.")
+
+    while True:
+        try:
+            presupuesto_val = float(input("¿Cuál es el presupuesto máximo?: "))
+            break
+        except ValueError:
+            print("❌ ¡Error! Ingresa un monto de dinero válido.")
+
+    while True:
+        try:
+            invitados_val = int(input("¿Cuántos invitados se esperan?: "))
+            break
+        except ValueError:
+            print("❌ ¡Error! Por favor, ingresa un número entero.")
+
+    # --- REGISTRO DE FECHA Y HORARIOS ---
+    while True:
+        fecha_input = input("Ingrese la fecha de la boda (DD/MM/AAAA): ")
+        try:
+            fecha_boda = datetime.strptime(fecha_input, "%d/%m/%Y")
+            if fecha_boda < datetime.now():
+                print("❌ No puedes elegir una fecha pasada.")
+            else:
+                fecha_str = fecha_input # Guardamos el string para las búsquedas
+                break
+        except ValueError:
+            print("⚠️ Formato incorrecto. Debe ser día/mes/año (ej: 15/05/2026)")
+
+    # --- NUEVO: Captura de Horas (Integrado) ---
+    while True:
+        try:
+            print("\nDefina el horario del evento (Formato 24h):")
+            h_inicio = int(input("Hora de inicio (0-23, ej: 14): "))
+            h_fin = int(input("Hora de finalización (0-23, ej: 22): "))
+
+            if 0 <= h_inicio < h_fin <= 23:
+                # Calculamos duración para el ticket más tarde
+                duracion = h_fin - h_inicio
+                print(f"✅ Horario reservado: {h_inicio}:00 a {h_fin}:00 ({duracion} horas).")
+                break
+
+            print("❌ La hora de fin debe ser mayor a la de inicio y ambas entre 0 y 23.")
+        except ValueError:
+            print("❌ Por favor, ingresa números enteros para las horas.")
+
+    # Guardamos los datos del cliente
+    cliente_actual = Cliente(id_cliente, nombre_usuario, correo_usuario, invitados_val, presupuesto_val)
+    fg.guardar_elemento(cliente_actual, lista_clientes, 'clientes.json')
+    print(f"✅ Cliente {cliente_actual.nombre} registrado.")
+    input("Presione Enter para elegir el lugar...")
+
+    # --- PASO 2: SELECCIÓN DE LUGAR ---
+    fg.limpiar_pantalla()
+    
+    # Ahora recibimos dos variables
+    lugares_libres, sugerencias = fg.get_lugares_disponibles(fecha_str, lista_lugares, h_inicio, h_fin, invitados_val)
+    
+    if not lugares_libres:
+        print(f"❌ No hay lugares disponibles para el {fecha_str} a esa hora.")
+        
+        if sugerencias:
+            print("\n💡 SUGERENCIAS DEL SISTEMA INTELIGENTE:")
+            for sug in sugerencias:
+                print(f"   -> El lugar '{sug['nombre']}' está libre el día {sug['fecha']}")
+        
+        print("\nIntente con otra fecha o lugar.")
+        input("Presione Enter para salir...")
+        return
+    
+    fg.mostar_lugares(lugares_libres)
+
+    id_lug = int(input("Seleccione ID del lugar: "))
+    lugar_seleccionado = fg.buscar_elemento_id(id_lug, lista_lugares)
+
+    # Validación de capacidad y presupuesto
+    if not fg.can_select_lugar(lugar_seleccionado, cliente_actual.invitados, cliente_actual.presupuesto):
+        input("\nPresione Enter para salir...")
+        return
+
+    # --- PASO 3: SELECCIÓN DE PERSONAL ---
+    print("\n--- PASO 4: SELECCIÓN DE PERSONAL ---")
+    tipo_a_buscar = input("¿Qué tipo de personal busca? (Música/Fotógrafa/etc): ")
+
+    pers_libres = fg.get_personal_disponible(tipo_a_buscar, lista_personal, fecha_str, h_inicio, h_fin)
+    fg.mostrar_personal(pers_libres)
+
+    personal_contratado = []
+    if pers_libres:
+        id_p = int(input("ID del trabajador a contratar: "))
+        dict_trabajador = fg.contratar_personal(lista_personal, id_p)
+
+        if dict_trabajador:
+            # Convertimos el diccionario a Objeto Personal para que build_cotizacion funcione
+            p_obj = Personal(
+                dict_trabajador['id_personal'],
+                dict_trabajador['nombre'],
+                dict_trabajador['oficio'],
+                dict_trabajador['sueldo']
+            )
+            personal_contratado.append(p_obj)
+            print(f"✅ {p_obj.nombre} añadido a la boda.")
+    # --- PASO 4: SELECCIÓN DE SERVICIOS (Catering y Música Extra) ---
+    servicios_elegidos = []
+
+    # --- 4.1 Bucle para Catering ---
+    fg.limpiar_pantalla()
+    print("--- PASO 4.1: MENÚ DE CATERING ---")
+    for p in lista_catering:
+        print(f"ID: {p['id_item']} | {p['nombre']} | Precio: ${p['precio_unitario']}")
+
+    while True:
+        op = input("\nID del plato (o '0' para pasar a música): ")
+        if op == '0': 
+            break
+
+        try:
+            id_ingresado = int(op)
+            plato = next((x for x in lista_catering if x['id_item'] == id_ingresado), None)
+
+            if plato:
+                cant = int(input(f"¿Cuántas unidades de {plato['nombre']}?: "))
+
+                # --- VALIDACIÓN DE INVENTARIO ---
+                # Buscamos si el nombre del plato coincide con algo en el inventario (ej: "Vino", "Sillas")
+                recurso = next((i for i in lista_inventario if i['nombre'].lower() in plato['nombre'].lower()), None)
+                
+                if recurso and recurso['cantidad'] < cant:
+                    print(f"❌ Stock insuficiente. Solo quedan {recurso['cantidad']} unidades de {recurso['nombre']}.")
+                else:
+                    # Si hay stock (o no requiere inventario), lo añadimos
+                    item = ItemReserva(plato['id_item'], plato['nombre'], plato['precio_unitario'], cant)
+                    servicios_elegidos.append(item)
+                    print(f"✅ {plato['nombre']} añadido.")
+            else:
+                print("❌ ID no encontrado.")
+        except ValueError:
+            print("⚠️ Por favor, ingresa solo números.")
+
+    # --- 4.2 Bucle para Música ---
+    fg.limpiar_pantalla()
+    print("\n--- PASO 4.2: MENÚ DE MÚSICA ---")
+    for m in lista_musica:
+        print(f"ID: {m['id_item']} | {m['nombre']} | Precio: ${m['precio_unitario']}")
+
+    while True:
+        om = input("\nID del servicio musical (o '0' para finalizar): ")
+        if om == '0': 
+            break
+
+        try:
+            id_m = int(om)
+            musico = next((x for x in lista_musica if x['id_item'] == id_m), None)
+
+            if musico:
+                cant = int(input(f"¿Cuántas unidades de {musico['nombre']}?: "))
+                
+                # Validación de inventario para música (ej: si tienes límite de 'Altavoces' o 'Micrófonos')
+                recurso_m = next((i for i in lista_inventario if i['nombre'].lower() in musico['nombre'].lower()), None)
+
+                if recurso_m and recurso_m['cantidad'] < cant:
+                    print(f"❌ Stock insuficiente de {recurso_m['nombre']}.")
+                else:
+                    item = ItemReserva(musico['id_item'], musico['nombre'], musico['precio_unitario'], cant)
+                    servicios_elegidos.append(item)
+                    print(f"✅ {musico['nombre']} añadido.")
+            else:
+                print("❌ ID no encontrado.")
+        except ValueError:
+            print("⚠️ Por favor, ingresa solo números.")
+
+    # --- PASO 4.3: VALIDACIÓN INTELIGENTE ---
+    valido, mensaje = fg.validar_restricciones_inteligentes(personal_contratado, servicios_elegidos, lugar_seleccionado)
+
+    if not valido:
+        print("\n" + "!"*40)
+        print(f"ATENCIÓN: {mensaje}")
+        print("!"*40)
+        print("\nNo podemos proceder con esta configuración. Ajuste sus selecciones.")
+        input("Presione Enter para volver al menú...")
+        return # Aquí cortamos la ejecución y regresamos al menú principal
+
+    # --- PASO 5: CÁLCULOS Y COTIZACIÓN ---
+    # build_cotizacion usa el string de fecha para el registro
+    cotizacion = fg.build_cotizacion(
+        cliente_actual,
+        lugar_seleccionado,
+        personal_contratado,
+        servicios_elegidos,
+        fecha_str,
+        h_inicio,  
+        h_fin
+    )
+
+    # --- PASO 6: CIERRE Y BLOQUEO ---
+    # approve_cotizacion muestra el resumen y pide confirmación (S/N)
+    if fg.approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventario):
+
+        # Procesa bloqueos de fechas en listas y resta inventario
+        fg.procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_inventario)
+
+        # Guardar cambios en archivos físicos
+        fg.write_json('lugares.json', lista_lugares)
+        fg.write_json('personal.json', lista_personal)
+        fg.write_json('inventario.json', lista_inventario)
+
+        # Generar archivos finales
+        fg.guardar_reserva_json(cotizacion)
+        # fg.generar_ticket(...) # Si tienes la función habilitada
+        
+        print("\n✅ ¡Boda planificada y recursos bloqueados con éxito!")
+        # 3. GENERACIÓN DEL TICKET TXT (Lo que te faltaba)
+        # Usamos los datos calculados en 'cotizacion'
+        fg.generar_ticket(
+            cliente_actual,
+            lugar_seleccionado,
+            personal_contratado,
+            servicios_elegidos,
+            cotizacion['subtotal'],
+            cotizacion['comision'],
+            cotizacion['total_final'],
+            fecha_boda # El objeto datetime para que el ticket ponga la fecha bonita
+        )
+        
+        print("\n✅ ¡Boda planificada con éxito!")
+        print("📄 Se ha generado 'resumen_boda.txt' con todos los detalles.")
+    else:
+        print("\nOpciones descartadas. Volviendo al menú...")
+
+if __name__ == "__main__":
+    ejecutar_registro_boda()      

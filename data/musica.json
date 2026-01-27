@@ -1,0 +1,37 @@
+[
+    {
+        "id_item": 1,
+        "nombre": "DJ Pro - Mezcla en Vivo y Luces",
+        "precio_unidad": 450.0,
+        "descripcion": "Set de 6 horas con iluminación robótica y animador.",
+        "categoria": "Música"
+    },
+    {
+        "id_item": 2,
+        "nombre": "Banda de Jazz 'Blue Note'",
+        "precio_unidad": 950.0,
+        "descripcion": "Cuarteto ideal para la recepción y cena elegante.",
+        "categoria": "Música"
+    },
+    {
+        "id_item": 3,
+        "nombre": "Mariachi Real de Oro",
+        "precio_unidad": 600.0,
+        "descripcion": "Show de 1 hora con 8 integrantes para el cierre.",
+        "categoria": "Música"
+    },
+    {
+        "id_item": 4,
+        "nombre": "Solo de Violín Eléctrico",
+        "precio_unidad": 300.0,
+        "descripcion": "Música moderna instrumental para la ceremonia.",
+        "categoria": "Música"
+    },
+    {
+        "id_item": 5,
+        "nombre": "Banda de Rock/Pop 'Los 80s'",
+        "precio_unidad": 1200.0,
+        "descripcion": "Música en vivo para bailar toda la noche.",
+        "categoria": "Música"
+    }
+]

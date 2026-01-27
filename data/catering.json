@@ -1,0 +1,56 @@
+[
+    {   "id_item": 1,
+        "categoria": "Aperitivos",
+        "nombre": "Estación de Quesos Artesanales y Fiambres",
+        "cantidad": 200,
+        "precio_unidad": 35.0
+    },
+    {   "id_item": 2,
+        "categoria": "Gastronomía",
+        "nombre": "Banquete Gala de los Cerezos",
+        "cantidad": 150,
+        "precio_unidad": 85.0
+    },
+    {   "id_item": 3,
+        "categoria": "Gastronomía",
+        "nombre": "Filete Mignon en Salsa de Oporto",
+        "cantidad": 150,
+        "precio_unidad": 95.0
+    },
+    {   "id_item": 4,
+        "categoria": "Gastronomía",
+        "nombre": "Salmón en Costra de Almendras y Cítricos",
+        "cantidad": 120,
+        "precio_unidad": 78.0
+    },
+    {   "id_item": 5,
+        "categoria": "Gastronomía",
+        "nombre": "Risotto de Setas Silvestres y Trufa",
+        "cantidad": 100,
+        "precio_unidad": 65.0
+    },
+    {   "id_item": 6,
+        "categoria": "Bebidas",
+        "nombre": "Vino Blanco Albariño",
+        "cantidad": 120,
+        "precio_unidad": 18.5
+    },
+    {   "id_item": 7,
+        "categoria": "Bebidas",
+        "nombre": "Champagne Brut Reserva",
+        "cantidad": 80,
+        "precio_unidad": 45.0
+    },
+    {   "id_item": 8,
+        "categoria": "Bebidas",
+        "nombre": "Barra Libre de Coctelería Clásica",
+        "cantidad": 300,
+        "precio_unidad": 15.0
+    },
+    {   "id_item": 9,
+        "categoria": "Postres",
+        "nombre": "Pastel de Bodas 5 Pisos",
+        "cantidad": 5,
+        "precio_unidad": 450.0
+    }
+]

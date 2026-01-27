@@ -1,0 +1,41 @@
+[
+    {   "id_item": 1,        "nombre": "Sillas Crossback de Madera",
+        "cantidad": 200,
+        "precio_unidad": 5.5
+    },
+    {   "id_item": 2,
+        "nombre": "Vajilla Porcelana Borde Dorado",
+        "cantidad": 200,
+        "precio_unidad": 8.0
+    },
+    {   "id_item": 3,
+        "nombre": "Cristalería Bohemia",
+        "cantidad": 250,
+        "precio_unidad": 4.0
+    },
+    {   "id_item": 4,
+        "nombre": "Mantelería de Lino Natural",
+        "cantidad": 30,
+        "precio_unidad": 25.0
+    },
+    {   "id_item": 5,
+        "nombre": "Calentador de Exterior de Gas",
+        "cantidad": 10,
+        "precio_unidad": 45.0
+    },
+    {   "id_item": 6,
+        "nombre": "Pista de Baile Modular (m2)",
+        "cantidad": 50,
+        "precio_unidad": 15.0
+    },
+    {   "id_item": 7,
+        "nombre": "Proyector + Pantalla 100 pulgadas",
+        "cantidad": 2,
+        "precio_unidad": 85.0
+    },
+    {   "id_item": 8,
+        "nombre": "Arco de Ceremonia Minimalista",
+        "cantidad": 3,
+        "precio_unidad": 120.0
+    }
+]

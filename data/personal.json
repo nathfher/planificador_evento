@@ -1,0 +1,68 @@
+[
+    {
+        "id_personal": 1,
+        "nombre": "DJ Carlos",
+        "oficio": "Música",
+        "sueldo": 500,
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 2,
+        "nombre": "Ana Fotografía",
+        "oficio": "Fotógrafa",
+        "sueldo": 800,
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 3,
+        "nombre": "Cuarteto de Cuerdas",
+        "oficio": "Música clásica",
+        "sueldo": 1200,
+        "fechas_ocupadas": []
+    },
+    {
+
+        "id_personal": 4,
+        "nombre": "Ana Heredia",
+        "oficio": "Wedding Planner",
+        "sueldo": 1500,
+        "fechas_ocupadas": []
+    },
+    {
+
+        "id_personal": 5,
+        "nombre": "Roberto Juez",
+        "oficio": "Maestro de Ceremonias",
+        "sueldo": 400,
+        "fechas_ocupadas": []
+    },
+    {
+
+        "id_personal": 6,
+        "nombre": "Miley Style",
+        "oficio": "Maquillaje y Peinado",
+        "sueldo": 300,
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 7,
+        "nombre": "Arte y Flores",
+        "oficio": "Decorador / Florista",
+        "sueldo": 1200,
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 8,
+        "nombre": "Seguridad Total",
+        "oficio": "Seguridad y Valet Parking",
+        "sueldo": 350,
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 9,
+        "nombre": "Julián Sommelier",
+        "oficio": "Sommelier / Barman especializado",
+        "sueldo": 450,
+        "fechas_ocupadas": []
+    }
+]
