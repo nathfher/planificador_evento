@@ -168,7 +168,7 @@ def ejecutar_registro_boda():
     # --- 4.1 Bucle para Catering ---  
     fg.limpiar_pantalla()
     print("--- PASO 4.1: MENÚ DE CATERING ---")
-    if tipo_buscado.lower() in ["catering", "todos"]:
+    if tipo_buscado.lower().strip() in ["catering", "todos"]:
         fg.limpiar_pantalla()
         print("--- PASO 4.1: MENÚ DE CATERING ---")
         for p in lista_catering:
@@ -230,7 +230,7 @@ def ejecutar_registro_boda():
     # --- 4.2 Bucle para Música ---
     fg.limpiar_pantalla()
     print("\n--- PASO 4.2: MENÚ DE MÚSICA ---")
-    if tipo_buscado.lower() in ["catering", "todos"]:
+    if tipo_buscado.lower().strip() in ["musica", "todos"]:
         for m in lista_musica:
             print(f"ID: {m['id_item']} | {m['nombre']} | Precio: ${m['precio_unidad']}")
 
