@@ -38,6 +38,7 @@ A diferencia de los presupuestos "a ojo" que podrían hacerse en Montepinar, est
 ## 5. Problemas que se resolvieron
 
 * **Guardar los datos:** Costó un poco hacer que la información de las bodas se guardara bien en los archivos JSON sin perder datos. Se solucionó creando una función que convierte los objetos del código en listas que el archivo puede entender.
+* **Inconsistencia en el Nombramiento de Variables**: Se corrigieron múltiples errores de ejecución provocados por llamar a una misma variable de distintas formas (ej: total en JSON vs total_final en Python). Se estandarizó el vocabulario técnico para asegurar la integridad de los cálculos.
 * **El idioma de las fechas:** Al principio los meses daban problemas según si la computadora era Windows o Linux. Se arregló con un código que detecta el sistema y pone los meses en español correctamente.
 * **El stock del almacén (Pools):** Fue un reto controlar que no se gastaran más cosas de las que hay (como platos o bebidas). Se logró programar una función que resta del inventario según el número de invitados.
 
