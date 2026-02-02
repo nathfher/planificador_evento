@@ -117,7 +117,7 @@ def ejecutar_registro_boda():
 
     # Ahora recibimos dos variables
     lugares_libres, sugerencias = fg.get_lugares_disponibles(fecha_str, lista_lugares, h_inicio, h_fin, invitados_val)
-    
+
     if not lugares_libres:
         print(f"❌ No hay lugares disponibles para el {fecha_str} a esa hora.")
 

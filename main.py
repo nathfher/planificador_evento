@@ -69,7 +69,7 @@ def main():
     """
     while True:
         fg.limpiar_pantalla()
-        print("=== MENU WEDDING PLANNER ===")
+        print("=== MENU RAQUEL & ALBA PLANNER ===")
         print("1. Nueva Boda")
         print("2. Ver Historial")
         print("3. Salir")
