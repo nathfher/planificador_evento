@@ -145,12 +145,18 @@ def ejecutar_registro_boda():
     personal_contratado = []
 
     while True:
-        tipo_buscado = input("\n¿Qué tipo de personal busca? (Música/Fotógrafa/etc) o '0' para continuar: ").strip().lower()
-        
+        print("\nIndique qué tipo de personal busca (ej: Música, Fotografía, Seguridad).")
+        tipo_buscado = input("Escriba el oficio o '0' para finalizar la contratación de personal: ").strip().lower()
+
         if tipo_buscado == '0':
+            if not personal_contratado:
+                print("⚠️ No has contratado a nadie aún.")
+                confirmar_salir = input("¿Deseas continuar sin personal? (S/N): ").lower()
+                if confirmar_salir == 's': break
+                else: continue
             break
 
-        # Buscamos personal disponible
+        # Buscamos personal disponible para ese oficio y horario
         pers_libres = fg.get_personal_disponible(tipo_buscado, lista_personal, fecha_str, h_inicio, h_fin)
         
         if not pers_libres:
@@ -160,16 +166,20 @@ def ejecutar_registro_boda():
         fg.mostrar_personal(pers_libres)
 
         try:
-            id_p = int(input("ID del trabajador a contratar (o '0' para buscar otro oficio): "))
-            if id_p == 0: continue
+            id_p = int(input(f"ID del {tipo_buscado} a contratar (o '0' para buscar otro oficio): "))
+            if id_p == 0:
+                continue
 
             dict_trabajador = fg.contratar_personal(lista_personal, id_p)
 
             if dict_trabajador:
-                # Validamos que no esté ya contratado en esta sesión
-                if any(p.id_personal == dict_trabajador['id_personal'] for p in personal_contratado):
-                    print("⚠️ Este trabajador ya ha sido añadido a la planificación.")
+                # Evitar contratar dos veces a la misma persona en la misma boda
+                ya_esta = any(p.id_personal == dict_trabajador['id_personal'] for p in personal_contratado)
+                
+                if ya_esta:
+                    print("⚠️ Este trabajador ya está en tu lista para esta boda.")
                 else:
+                    # Convertimos a objeto de la clase Personal
                     p_obj = Personal(
                         dict_trabajador['id_personal'],
                         dict_trabajador['nombre'],
@@ -177,9 +187,15 @@ def ejecutar_registro_boda():
                         dict_trabajador['sueldo']
                     )
                     personal_contratado.append(p_obj)
-                    print(f"✅ {p_obj.nombre} ({p_obj.oficio}) añadido a la boda.")
+                    print(f"✅ {p_obj.nombre} ({p_obj.oficio}) añadido correctamente.")
+            else:
+                print("❌ ID de trabajador no válido.")
+
         except ValueError:
             print("⚠️ Por favor, ingresa un número de ID válido.")
+
+    print(f"\n👍 Selección de personal terminada. Total contratados: {len(personal_contratado)}")
+    
     # --- PASO 4: SELECCIÓN DE SERVICIOS (Catering y Música Extra) ---
     servicios_elegidos = []
 

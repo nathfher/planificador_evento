@@ -412,7 +412,7 @@ def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario
 def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventario):
     """Evita reservas accidentales, avisa si se gaurda la cot o no con bool"""
     print(f"RESUMEN DE COTIZACIÓN PARA: {cotizacion['cliente']}")
-    print(f"TOTAL A PAGAR: ${cotizacion['total_final']}")
+    print(f"TOTAL A PAGAR: ${cotizacion['total']}")
 
     confirmar = input("¿Desea confirmar y aprobar esta boda? (S/N): ").lower()
 
