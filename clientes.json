@@ -1,0 +1,9 @@
+[
+    {
+        "id_cliente": "1",
+        "nombre": "nathalie",
+        "email": "@nathalie",
+        "invitados": 200,
+        "presupuesto": 8000.0
+    }
+]

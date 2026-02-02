@@ -91,21 +91,28 @@ def ejecutar_registro_boda():
 
     # --- NUEVO: Captura de Horas (Integrado) ---
     while True:
-        try:
-            print("\nDefina el horario del evento (Formato 24h):")
-            h_inicio = int(input("Hora de inicio (0-23, ej: 14): "))
-            h_fin = int(input("Hora de finalización (0-23, ej: 22): "))
+        print("\nDefina el horario del evento (Formato 24h):")
+        h_inicio = input("Hora de inicio (ej: 14 o 14:30): ").strip()
+        h_fin = input("Hora de finalización (ej: 22 o 22:00): ").strip()
 
-            if 0 <= h_inicio < h_fin <= 23:
-                # Calculamos duración para el ticket más tarde
-                duracion = h_fin - h_inicio
-                print(f"✅ Horario reservado: {h_inicio}:00 a {h_fin}:00 ({duracion} horas).")
+        # 1. Quitamos los ':' para verificar que no haya letras (como 'helloworld')
+        prueba_ini = h_inicio.replace(":", "")
+        prueba_fin = h_fin.replace(":", "")
+
+        if prueba_ini.isdigit() and prueba_fin.isdigit():
+            # 2. Convertimos a números SOLO para validar el rango y calcular duración
+            # Tomamos solo los primeros dígitos antes de los ':' para la hora
+            hora_i = int(h_inicio.split(":")[0])
+            hora_f = int(h_fin.split(":")[0])
+
+            if 0 <= hora_i < 24 and 0 <= hora_f < 24 and hora_i < hora_f:
+                duracion = hora_f - hora_i
+                print(f"✅ Horario reservado: {h_inicio} a {h_fin} ({duracion} horas).")
                 break
-
-            print("❌ La hora de fin debe ser mayor a la de inicio y ambas entre 0 y 23.")
-        except ValueError:
-            print("❌ Por favor, ingresa números enteros para las horas.")
-
+            else:
+                print("❌ Horario ilógico. Asegúrate de que la hora sea entre 0-23 y que el fin sea después del inicio.")
+        else:
+            print("❌ ¡Error! No introduzcas letras. Usa números (ej: 14 o 14:30).")
     # Guardamos los datos del cliente
     cliente_actual = Cliente(id_cliente, nombre_usuario, correo_usuario, invitados_val, presupuesto_val)
     fg.guardar_elemento(cliente_actual, lista_clientes, 'clientes.json')
