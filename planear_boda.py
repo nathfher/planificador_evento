@@ -171,7 +171,7 @@ def ejecutar_registro_boda():
         fg.limpiar_pantalla()
         print("--- PASO 3: CONTRATACIÓN ---")
         print(f"Presupuesto disponible: ${cliente_actual.presupuesto}")
-        tipo_buscado = input("\n¿Qué busca? (Musica / Gastronomia / Fotografia / 0 para salir): ").lower().strip()
+        tipo_buscado = input("\n¿Qué busca? (Musica / Gastronomia / 0 para salir): ").lower().strip()
 
         if tipo_buscado == '0':
             # Verificamos si al menos contrató algo antes de salir (opcional)
@@ -180,12 +180,17 @@ def ejecutar_registro_boda():
 
         # 1. Ruteo lógico para Catálogos (Música y Gastronomía)
         if tipo_buscado == "musica" or tipo_buscado == "gastronomia":
-            archivo = "data/musica.json" if tipo_buscado == "musica" else "data/catering.json"
+            # Definimos el archivo y el título según la elección
+            if tipo_buscado == "musica":
+                print("\n--- PASO 3.1: MENÚ DE MÚSICA ---")
+                archivo = "data/musica.json"
+            else:
+                print("\n--- PASO 3.2: MENÚ DE GASTRONOMÍA ---")
+                archivo = "data/catering.json"
+
+            # Cargamos y mostramos
             lista_servicios = fg.cargar_json(archivo)
             fg.mostrar_opciones(lista_servicios)
-            # Nota: La lógica de selección de estos items se procesa en el Paso 4
-            input("\nPresione Enter para continuar con otra búsqueda...")
-            continue
 
         # 2. Ruteo lógico para Personal General (Fotografía, Seguridad, etc.)
         else:
