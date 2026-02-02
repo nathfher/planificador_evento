@@ -254,21 +254,6 @@ def get_lugares_disponibles(fecha_str, lista_lugares, h_ini, h_fin, invitados):
                     })
 
     return [], sugerencias
-def can_select_lugar(lugar,cant_invitados:int, presupuesto_max:float):
-    """
-    Valida si un salón cumple con los dos filtros restrictivos básicos:
-    Capacidad de personas y límite de presupuesto del cliente.
-    Informa al usuario el motivo específico en caso de rechazo.
-    """
-    if lugar['capacidad'] < cant_invitados:
-        print(f'La capacidad del salón es insuficiente para el número de invitados'
-              f'(Máx: {lugar["capacidad"]})')
-        return False
-    if lugar["costo"] > presupuesto_max:
-        print('El costo del salón excede el presupuesto máximo establecido')
-        return False
-    print('¡Perfecto!.El lugar cumple con los requisitos de capacidad y presupuesto')
-    return True
 
 def contratar_personal(lista_personal,id_personal):
     """
