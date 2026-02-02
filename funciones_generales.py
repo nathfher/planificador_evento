@@ -199,18 +199,6 @@ def contratar_personal(lista_personal,id_personal):
     print(f"¡{trabajador_encontrado['nombre']} seleccionado con éxito!")
     return trabajador_encontrado #la list_contratados la lleno en el main
 
-def calcular_costo_personal(lista_contratados):
-    """
-    Calcula el costo total de la mano de obra.
-    
-    Recorre la lista de profesionales seleccionados y suma sus sueldos/tarifas
-    individuales basándose en la llave 'costo_servicio'.
-    """
-    sueldo = 0
-    for i in lista_contratados:
-        sueldo+=i['costo_servicio']
-    return sueldo
-
 
 def calcular_costo_inventario(lista_items):
     """
@@ -248,12 +236,13 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
     """
     # 1. CÁLCULO DE COSTOS
     costo_inv = calcular_costo_inventario(lista_items)
-    costo_pers = calcular_costo_personal(sel_pers)
+    costo_pers = sum(p.sueldo for p in sel_pers)
     costo_lug = lug_elegido['precio']
 
     # Calculamos el total (asegúrate de que calculate_total maneje estos 3 montos)
+    subtotal = costo_inv + costo_lug + costo_pers
+    comision_val = subtotal * 0.10  # 10% de Wedding Planner
     total = calculate_total(costo_inv, costo_pers, costo_lug)
-
     # 2. CREAR EL DICCIONARIO FINAL (Incluyendo las nuevas variables)
     cotizacion_final = {
         'id_lugar': lug_elegido['id_lugar'],
@@ -265,6 +254,7 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
         'personal_contratado': sel_pers, 
         'items_pedidos': lista_items,
         'subtotal': costo_inv + costo_lug + costo_pers,
+        'comision': comision_val,
         'total_final': total, # Cambié 'total' por 'total_final' para coincidir con tu pl_boda
         'estado': 'Pendiente'
     }
@@ -401,8 +391,7 @@ def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario
         if p_maestro:
             p_maestro['fechas_ocupadas'] = [f for f in p_maestro['fechas_ocupadas'] if f['fecha'] != fecha_boda]
 
-    # 3. Devolver al inventario
-    for servicio in cotizacion['servicios_elegidos']:
+    for servicio in cotizacion['items_pedidos']: # Cambiado de 'servicios_elegidos' a 'items_pedidos'
         for item_inv in lista_inventario:
             if item_inv['nombre'].lower() in servicio.nombre.lower():
                 item_inv['cantidad'] += servicio.cantidad_requerida

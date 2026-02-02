@@ -121,9 +121,15 @@ def ejecutar_registro_boda():
                 print("❌ Horario ilógico. Asegúrate de que la hora sea entre 0-23 y que el fin sea después del inicio.")
         else:
             print("❌ ¡Error! No introduzcas letras. Usa números (ej: 14 o 14:30).")
-    # Guardamos los datos del cliente
+# Guardamos los datos del cliente
     cliente_actual = Cliente(id_cliente, nombre_usuario, correo_usuario, invitados_val, presupuesto_val)
-    fg.guardar_elemento(cliente_actual, lista_clientes, 'clientes.json')
+
+    # 1. Agregamos el cliente a la lista (convertido a diccionario)
+    lista_clientes.append(cliente_actual.to_dict())
+
+    # 2. Guardamos la lista completa en el archivo (Solo 2 parámetros: ruta y datos)
+    fg.write_json('data/clientes.json', lista_clientes)
+
     print(f"✅ Cliente {cliente_actual.nombre} registrado.")
     input("Presione Enter para elegir el lugar...")
 
@@ -228,11 +234,6 @@ def ejecutar_registro_boda():
                     print("✅ Requisito de seguridad para la Terraza cubierto.")
 
                 # --- GUARDAR SI NO ESTÁ REPETIDO ---
-                if any(p.id_personal == dict_p['id_personal'] for p in personal_contratado):
-                    print("⚠️ Ya contratado.")
-                else:
-                    personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], dict_p['sueldo']))
-                    print(f"✅ {dict_p['nombre']} añadido.")
                 if any(p.id_personal == dict_p['id_personal'] for p in personal_contratado):
                     print("⚠️ Ya contratado.")
                 else:
