@@ -198,16 +198,40 @@ def ejecutar_registro_boda():
             id_p = int(input(f"ID del {tipo} a contratar (0 para volver): "))
             if id_p == 0: continue
 
-            dict_p = fg.contratar_personal(lista_personal, id_p)
+            dict_p = fg.contratar_personal(lista_personal, id_p) #DICT_P DICCIONARIO DEL PERSONAL
             if dict_p:
+                nombre_p = dict_p['nombre'].lower()
+                oficio_p = dict_p['oficio'].lower()
+                    
+                    # --- AQUÍ INSERTAS LA VALIDACIÓN DE EXCLUSIÓN ---
+                    # REGLA: DJ vs BANDA DE ROCK (Sentido A)
+                if "dj" in nombre_p:
+                        # Revisamos si ya existe la Banda de Rock en servicios_elegidos
+                    if any("rock" in s.nombre.lower() for s in servicios_elegidos):
+                        print("❌ Conflicto: No puede contratar al DJ porque ya eligió la 'Banda de Rock'.")
+                        input("Presione Enter para continuar...")
+                        continue # Detiene la contratación y vuelve a pedir ID
+                    else:
+                        print("⚠️  AVISO: Al contratar este DJ, se bloqueará la opción de 'Banda de Rock'.")
+                # 2. REGLA: TERRAZA -> SEGURIDAD (La que pediste)
+                if "terraza" in lugar_seleccionado['nombre'].lower() and "seguridad" in oficio_p:
+                    print("✅ Requisito de seguridad para la Terraza cubierto.")
+
+                # --- GUARDAR SI NO ESTÁ REPETIDO ---
+                if any(p.id_personal == dict_p['id_personal'] for p in personal_contratado):
+                    print("⚠️ Ya contratado.")
+                else:
+                    personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], dict_p['sueldo']))
+                    print(f"✅ {dict_p['nombre']} añadido.")
                 if any(p.id_personal == dict_p['id_personal'] for p in personal_contratado):
                     print("⚠️ Ya contratado.")
                 else:
                     personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], dict_p['sueldo']))
                     print(f"✅ {dict_p['nombre']} añadido.")
             else: print("❌ ID no válido.")
-        except ValueError: print("⚠️ Ingrese un número.")
-        input("\nPresione Enter...")
+        except ValueError: 
+            print("⚠️ Ingrese un número.")
+            input("\nPresione Enter...")
 
     # --- PASO 4: SELECCIÓN DE SERVICIOS (CATÁLOGOS) ---
     # Definimos los catálogos para procesarlos en un solo bucle limpio
@@ -231,11 +255,22 @@ def ejecutar_registro_boda():
                 seleccionado = next((x for x in cat['lista'] if x['id_item'] == id_sel), None)
                 
                 if seleccionado:
+                    # --- AQUÍ VA LA VALIDACIÓN PREVENTIVA ---
+                    if "gala" in seleccionado['nombre'].lower():
+                        print("\n" + "!"*45)
+                        print("⚠️  ATENCIÓN: Los servicios de 'Gala' requieren")
+                        print("   contratar 'Maquillaje y Peinado' más adelante.")
+                        print("!"*45 + "\n")
+
+                        confirmar = input("¿Está de acuerdo en añadir este requisito a su búsqueda de personal posterior? (S/N): ").upper().strip()
+                        if confirmar != 'S':
+                            print("❌ Selección cancelada. Para elegir este menú debe aceptar el protocolo.")
+                            continue # Salta el resto del bucle y pide otro ID
                     cant = int(input(f"¿Cantidad de {seleccionado['nombre']}?: "))
-                    
+
                     # Validación de Inventario unificada
                     recurso = next((i for i in lista_inventario if i['nombre'].lower() in seleccionado['nombre'].lower()), None)
-                    
+
                     if recurso and recurso['cantidad'] < cant:
                         print(f"❌ Stock insuficiente. Solo quedan {recurso['cantidad']}.")
                     else:
@@ -243,7 +278,8 @@ def ejecutar_registro_boda():
                         print(f"✅ {seleccionado['nombre']} añadido.")
                 else:
                     print("❌ ID no encontrado.")
-            except ValueError: print("⚠️ Ingrese solo números.")
+            except ValueError:
+                print("⚠️ Ingrese solo números.")
     # --- PASO 4.3: VALIDACIÓN INTELIGENTE ---
     valido, mensaje = fg.validar_restricciones_inteligentes(personal_contratado,
                                                             servicios_elegidos,

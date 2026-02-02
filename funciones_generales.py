@@ -193,61 +193,51 @@ def hay_conflicto_horario(lista_reservas, fecha_nueva, h_ini_nueva, h_fin_nueva)
                 return True # ¡Hay choque!
     return False 
 
-from datetime import datetime
 
 def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
-    """
-    Busca trabajadores por categoría, verificando que no tengan el día ocupado
-    ni choques de horario con otros eventos en su agenda.
-    """
     disponibles = []
     formato_hora = "%H:%M"
 
-    # 1. NORMALIZACIÓN DE BÚSQUEDA (Para que 'música' encuentre 'Música')
-    # Quitamos tildes comunes y pasamos a minúsculas
+    # 1. NORMALIZACIÓN DE BÚSQUEDA
     busqueda = tipo_buscado.lower().strip().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
 
     try:
-        # Convertimos las horas de la boda a objetos de tiempo para comparar
         boda_inicio = datetime.strptime(h_ini, formato_hora).time()
         boda_fin = datetime.strptime(h_fin, formato_hora).time()
 
         for p in lista_personal:
             # 2. NORMALIZACIÓN DEL DATO DEL JSON
-            # Usamos .get('categoria', '') para que no explote si falta la llave
-            categoria_trabajador = p.get('categoria', '').lower().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
+            # Buscamos en 'categoria' o en 'oficio' para mayor seguridad
+            categoria_trabajador = p.get('categoria', p.get('oficio', '')).lower().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
 
-            # ¿Es la categoría que buscamos?
             if busqueda in categoria_trabajador:
                 
-                # 3. FILTRO DE FECHA (¿Tiene el día libre?)
+                # 3. FILTRO DE FECHA (Bloqueos totales por vacaciones/feriados)
                 fechas_bloqueadas = p.get('fechas_ocupadas', [])
                 if fecha in fechas_bloqueadas:
-                    continue # Salta a este trabajador, está de vacaciones o libre
+                    continue 
 
-                # 4. FILTRO DE HORARIO (¿Tiene otros eventos ese mismo día?)
-                # La agenda es un diccionario donde la llave es la fecha
+                # 4. FILTRO DE HORARIO (Agenda del día)
                 agenda_dia = p.get('agenda', {}).get(fecha, [])
                 hay_conflicto = False
 
                 for intervalo in agenda_dia:
-                    # 'intervalo' es ej: {"inicio": "10:00", "fin": "14:00"}
                     hora_ocu_ini = datetime.strptime(intervalo['inicio'], formato_hora).time()
                     hora_ocu_fin = datetime.strptime(intervalo['fin'], formato_hora).time()
 
-                    # Lógica de solapamiento: 
-                    # Si la boda empieza antes de que termine su evento Y termina después de que empiece
+                    # Lógica de solapamiento
                     if boda_inicio < hora_ocu_fin and boda_fin > hora_ocu_ini:
                         hay_conflicto = True
-                        break # Ya no miramos más horas, este trabajador está ocupado
+                        break 
 
-                # 5. RESULTADO FINAL
+                # 5. RESULTADO FINAL (CORREGIDO)
+                # Debe estar FUERA del bucle 'for intervalo', pero DENTRO del 'if busqueda'
                 if not hay_conflicto:
                     disponibles.append(p)
 
     except (ValueError, TypeError, KeyError) as e:
-        # Si el usuario escribió mal la hora o el JSON está corrupto
-        print(f"⚠️ Error al validar disponibilidad de '{tipo_buscado}': Formato incorrecto.")
+        # CORRECCIÓN: Usamos 'as e' para ver el error real, no el nombre de la variable buscada
+        print(f"⚠️ Error técnico al validar disponibilidad: {e}")
         return []
 
     return disponibles
