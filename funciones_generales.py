@@ -135,7 +135,7 @@ def mostar_lugares(lista_encontrada):
         print("SALONES DISPONIBLES")
         for l in lista_encontrada:
             print(f"ID: {l['id_lugar']} | {l['nombre']}"
-                f"Capacidad: {l['capacidad']} personas | Precio: ${l['costo']}")
+                f"Capacidad: {l['capacidad']} personas | Precio: ${l['precio']}")
 
         print('')
 
@@ -339,13 +339,10 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
     # 1. CÁLCULO DE COSTOS
     costo_inv = calcular_costo_inventario(lista_items)
     costo_pers = calcular_costo_personal(sel_pers)
-    costo_lug = lug_elegido['costo']
+    costo_lug = lug_elegido['precio']
 
     # Calculamos el total (asegúrate de que calculate_total maneje estos 3 montos)
-    total_boda = calculate_total(costo_inv, costo_pers, costo_lug)
-    
-    # --- NUEVO: Cálculo de duración para el ticket ---
-    duracion = h_fin - h_inicio
+    total = calculate_total(costo_inv, costo_pers, costo_lug)
 
     # 2. CREAR EL DICCIONARIO FINAL (Incluyendo las nuevas variables)
     cotizacion_final = {
@@ -355,11 +352,10 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
         'fecha': fecha,
         'h_inicio': h_inicio,      # <--- GUARDADO
         'h_fin': h_fin,            # <--- GUARDADO
-        'duracion': duracion,      # <--- DATO EXTRA PARA EL TICKET
         'personal_contratado': sel_pers, 
         'items_pedidos': lista_items,
         'subtotal': costo_inv + costo_lug + costo_pers,
-        'total_final': total_boda, # Cambié 'total' por 'total_final' para coincidir con tu pl_boda
+        'total_final': total, # Cambié 'total' por 'total_final' para coincidir con tu pl_boda
         'estado': 'Pendiente'
     }
 

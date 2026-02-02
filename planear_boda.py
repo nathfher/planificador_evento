@@ -178,15 +178,13 @@ def ejecutar_registro_boda():
             op = input("\nID del plato (o '0' para pasar a música): ")
             if op == '0':
                 break
-
             try:
                 id_ingresado = int(op)
                 plato = next((x for x in lista_catering if x['id_item'] == id_ingresado), None)
-
                 if plato:
                     cant = int(input(f"¿Cuántas unidades de {plato['nombre']}?: "))
+                    # Validación de inventario
                     recurso = next((i for i in lista_inventario if i['nombre'].lower() in plato['nombre'].lower()), None)
-
                     if recurso and recurso['cantidad'] < cant:
                         print(f"❌ Stock insuficiente. Solo quedan {recurso['cantidad']} unidades.")
                     else:
@@ -197,35 +195,6 @@ def ejecutar_registro_boda():
                     print("❌ ID no encontrado.")
             except ValueError:
                 print("⚠️ Ingrese solo números.")
-
-
-    while True:
-        op = input("\nID del plato (o '0' para pasar a música): ")
-        if op == '0': 
-            break
-
-        try:
-            id_ingresado = int(op)
-            plato = next((x for x in lista_catering if x['id_item'] == id_ingresado), None)
-
-            if plato:
-                cant = int(input(f"¿Cuántas unidades de {plato['nombre']}?: "))
-
-                # --- VALIDACIÓN DE INVENTARIO ---
-                # Buscamos si el nombre del plato coincide con algo en el inventario (ej: "Vino", "Sillas")
-                recurso = next((i for i in lista_inventario if i['nombre'].lower() in plato['nombre'].lower()), None)
-
-                if recurso and recurso['cantidad'] < cant:
-                    print(f"❌ Stock insuficiente. Solo quedan {recurso['cantidad']} unidades de {recurso['nombre']}.")
-                else:
-                    # Si hay stock (o no requiere inventario), lo añadimos
-                    item = ItemReserva(plato['id_item'], plato['nombre'], plato['precio_unidad'], cant)
-                    servicios_elegidos.append(item)
-                    print(f"✅ {plato['nombre']} añadido.")
-            else:
-                print("❌ ID no encontrado.")
-        except ValueError:
-            print("⚠️ Por favor, ingresa solo números.")
 
     # --- 4.2 Bucle para Música ---
     fg.limpiar_pantalla()
