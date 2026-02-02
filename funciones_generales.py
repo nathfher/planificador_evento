@@ -193,36 +193,62 @@ def hay_conflicto_horario(lista_reservas, fecha_nueva, h_ini_nueva, h_fin_nueva)
                 return True # ¡Hay choque!
     return False 
 
-def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_inicio, h_fin):
+from datetime import datetime
+
+def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
+    """
+    Busca trabajadores por categoría, verificando que no tengan el día ocupado
+    ni choques de horario con otros eventos en su agenda.
+    """
     disponibles = []
-    tipo_buscado = tipo_buscado.strip().lower()
+    formato_hora = "%H:%M"
 
-    # Convertimos las horas de la boda a objetos comparables
-    formato = "%H:%M"
-    boda_inicio = datetime.strptime(h_inicio, formato).time()
-    boda_fin = datetime.strptime(h_fin, formato).time()
+    # 1. NORMALIZACIÓN DE BÚSQUEDA (Para que 'música' encuentre 'Música')
+    # Quitamos tildes comunes y pasamos a minúsculas
+    busqueda = tipo_buscado.lower().strip().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
 
-    for p in lista_personal:
-        oficio_json = p['oficio'].strip().lower()
+    try:
+        # Convertimos las horas de la boda a objetos de tiempo para comparar
+        boda_inicio = datetime.strptime(h_ini, formato_hora).time()
+        boda_fin = datetime.strptime(h_fin, formato_hora).time()
 
-        if tipo_buscado in oficio_json:
-            # Si el trabajador tiene agenda para ese día, revisamos horas
-            agenda_dia = p.get('agenda', {}).get(fecha, [])
+        for p in lista_personal:
+            # 2. NORMALIZACIÓN DEL DATO DEL JSON
+            # Usamos .get('categoria', '') para que no explote si falta la llave
+            categoria_trabajador = p.get('categoria', '').lower().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
 
-            conflicto = False
-            for intervalo in agenda_dia:
-                # intervalo es algo como {"inicio": "18:00", "fin": "22:00"}
-                ocupado_ini = datetime.strptime(intervalo['inicio'], formato).time()
-                ocupado_fin = datetime.strptime(intervalo['fin'], formato).time()
+            # ¿Es la categoría que buscamos?
+            if busqueda in categoria_trabajador:
+                
+                # 3. FILTRO DE FECHA (¿Tiene el día libre?)
+                fechas_bloqueadas = p.get('fechas_ocupadas', [])
+                if fecha in fechas_bloqueadas:
+                    continue # Salta a este trabajador, está de vacaciones o libre
 
-                # Lógica de solapamiento: (InicioA < FinB) y (FinA > InicioB)
-                if boda_inicio < ocupado_fin and boda_fin > ocupado_ini:
-                    conflicto = True
-                    break
+                # 4. FILTRO DE HORARIO (¿Tiene otros eventos ese mismo día?)
+                # La agenda es un diccionario donde la llave es la fecha
+                agenda_dia = p.get('agenda', {}).get(fecha, [])
+                hay_conflicto = False
 
-            if not conflicto:
-                # Si no hay conflicto de horas o ni siquiera tenía eventos ese día
-                disponibles.append(p)
+                for intervalo in agenda_dia:
+                    # 'intervalo' es ej: {"inicio": "10:00", "fin": "14:00"}
+                    hora_ocu_ini = datetime.strptime(intervalo['inicio'], formato_hora).time()
+                    hora_ocu_fin = datetime.strptime(intervalo['fin'], formato_hora).time()
+
+                    # Lógica de solapamiento: 
+                    # Si la boda empieza antes de que termine su evento Y termina después de que empiece
+                    if boda_inicio < hora_ocu_fin and boda_fin > hora_ocu_ini:
+                        hay_conflicto = True
+                        break # Ya no miramos más horas, este trabajador está ocupado
+
+                # 5. RESULTADO FINAL
+                if not hay_conflicto:
+                    disponibles.append(p)
+
+    except (ValueError, TypeError, KeyError) as e:
+        # Si el usuario escribió mal la hora o el JSON está corrupto
+        print(f"⚠️ Error al validar disponibilidad de '{tipo_buscado}': Formato incorrecto.")
+        return []
 
     return disponibles
 
@@ -576,6 +602,53 @@ def generar_ticket(cliente, lugar, personal, servicios, subtotal, comision, tota
         f.write("------------------------------------------\n")
         f.write("\n¡Gracias por confiar en nosotros!")
 
+def can_select_lugar(presupuesto_cliente, precio_lugar):
+    """
+    Comprueba si el cliente tiene dinero suficiente para el salón.
+    """
+    if presupuesto_cliente >= precio_lugar:
+        return True
+    else:
+        return False
+
+def cargar_json(nombre_archivo):
+    """
+    Abre un archivo JSON y devuelve la lista de datos.
+    Si el archivo no existe o está vacío, devuelve una lista vacía.
+    """
+    try:
+        with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
+            return json.load(archivo)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Si el archivo no existe o tiene un error de formato, no rompemos el programa
+        
+        return []
+
+def mostrar_opciones(lista):
+    """
+    Muestra los servicios de los catálogos de Música o Catering.
+    """
+    if not lista:
+        print("⚠️ No hay opciones disponibles en este catálogo.")
+        return
+
+    print("\n" + "="*30)
+    print("   OPCIONES DISPONIBLES")
+    print("="*30)
+
+    for item in lista:
+        nombre = item.get('nombre', 'Sin nombre')
+        id_item = item.get('id', '??')
+        
+        # Si es catering, buscamos 'precio_persona'
+        if 'precio_persona' in item:
+            print(f"ID: {id_item} | {nombre.ljust(20)} | ${item['precio_persona']} por persona")
+        # Si es música u otro servicio fijo, buscamos 'precio'
+        else:
+            precio = item.get('precio', 0)
+            print(f"ID: {id_item} | {nombre.ljust(20)} | ${precio} (Total)")
+    
+    print("="*30)
 
 def validar_restricciones_inteligentes(personal_contratado, servicios_elegidos, lugar_seleccionado):
     """

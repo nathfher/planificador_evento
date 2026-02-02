@@ -92,22 +92,22 @@ def ejecutar_registro_boda():
     # --- NUEVO: Captura de Horas (Integrado) ---
     while True:
         print("\nDefina el horario del evento (Formato 24h):")
-        h_inicio = input("Hora de inicio (ej: 14 o 14:30): ").strip()
+        h_ini = input("Hora de inicio (ej: 14 o 14:30): ").strip()
         h_fin = input("Hora de finalización (ej: 22 o 22:00): ").strip()
 
         # 1. Quitamos los ':' para verificar que no haya letras (como 'helloworld')
-        prueba_ini = h_inicio.replace(":", "")
+        prueba_ini = h_ini.replace(":", "")
         prueba_fin = h_fin.replace(":", "")
 
         if prueba_ini.isdigit() and prueba_fin.isdigit():
             # 2. Convertimos a números SOLO para validar el rango y calcular duración
             # Tomamos solo los primeros dígitos antes de los ':' para la hora
-            hora_i = int(h_inicio.split(":")[0])
+            hora_i = int(h_ini.split(":")[0])
             hora_f = int(h_fin.split(":")[0])
 
             if 0 <= hora_i < 24 and 0 <= hora_f < 24 and hora_i < hora_f:
                 duracion = hora_f - hora_i
-                print(f"✅ Horario reservado: {h_inicio} a {h_fin} ({duracion} horas).")
+                print(f"✅ Horario reservado: {h_ini} a {h_fin} ({duracion} horas).")
                 break
             else:
                 print("❌ Horario ilógico. Asegúrate de que la hora sea entre 0-23 y que el fin sea después del inicio.")
@@ -123,7 +123,7 @@ def ejecutar_registro_boda():
     fg.limpiar_pantalla()
 
     # Ahora recibimos dos variables
-    lugares_libres, sugerencias = fg.get_lugares_disponibles(fecha_str, lista_lugares, h_inicio, h_fin, invitados_val)
+    lugares_libres, sugerencias = fg.get_lugares_disponibles(fecha_str, lista_lugares, h_ini, h_fin, invitados_val)
 
     if not lugares_libres:
         print(f"❌ No hay lugares disponibles para el {fecha_str} a esa hora.")
@@ -138,78 +138,101 @@ def ejecutar_registro_boda():
         return
 
     fg.mostar_lugares(lugares_libres)
+    lugar_elegido = None  # Empezamos sin nada
 
-    id_lug = int(input("Seleccione ID del lugar: "))
-    lugar_seleccionado = next((l for l in lugares_libres if l['id_lugar'] == id_lug), None)
-    if lugar_seleccionado:
-        lugar_elegido = lugar_seleccionado
-        print(f"✅ Sede confirmada: {lugar_elegido['nombre']}")
-    else:
-        print("❌ ID no válido o el lugar no estaba en la lista de disponibles.")
-        input("\nPresione Enter para salir...")
-        return
+    while lugar_elegido is None:  # Mientras no tengamos un lugar válido...
+        try:
+            id_lug = int(input("\nSeleccione ID del lugar (o '0' para cancelar): "))
+        
+            if id_lug == 0:
+                print("Operación cancelada.")
+                return # Salimos de la función si se arrepienten
 
+            lugar_seleccionado = next((l for l in lugares_libres if l['id_lugar'] == id_lug), None)
 
-    # --- PASO 3: SELECCIÓN DE PERSONAL ---
-    print("\n--- PASO 3: SELECCIÓN DE PERSONAL ---")
+            if lugar_seleccionado:
+            # Usamos tu función can_select_lugar
+                if fg.can_select_lugar(cliente_actual.presupuesto, lugar_seleccionado['precio']):
+                    lugar_elegido = lugar_seleccionado # <--- ESTO ROMPE EL BUCLE
+                    print(f"✅ Sede confirmada: {lugar_elegido['nombre']}")
+                else:
+                    print(f"❌ ¡Presupuesto insuficiente! El salón cuesta ${lugar_seleccionado['precio']} y solo tienes ${cliente_actual.presupuesto}.")
+                    print("Por favor, elige uno más barato.")
+            else:
+                print("❌ ID no encontrado en la lista de salones disponibles.")
+            
+        except ValueError:
+            print("❌ Por favor, introduce un número válido.")
+
+    # --- PASO 3: CONTRATACIÓN ---
     personal_contratado = []
-
+    
     while True:
-        print("\nIndique qué tipo de personal busca (ej: Música, Fotografía, Seguridad).")
-        tipo_buscado = input("Escriba el oficio o '0' para finalizar la contratación de personal: ").strip().lower()
+        fg.limpiar_pantalla()
+        print("--- PASO 3: CONTRATACIÓN ---")
+        print(f"Presupuesto disponible: ${cliente_actual.presupuesto}")
+        tipo_buscado = input("\n¿Qué busca? (Musica / Gastronomia / Fotografia / 0 para salir): ").lower().strip()
 
         if tipo_buscado == '0':
-            if not personal_contratado:
-                print("⚠️ No has contratado a nadie aún.")
-                confirmar_salir = input("¿Deseas continuar sin personal? (S/N): ").lower()
-                if confirmar_salir == 's': break
-                else: continue
+            # Verificamos si al menos contrató algo antes de salir (opcional)
+            print(f"\n👍 Selección terminada. Total personal: {len(personal_contratado)}")
             break
 
-        # Buscamos personal disponible para ese oficio y horario
-        pers_libres = fg.get_personal_disponible(tipo_buscado, lista_personal, fecha_str, h_inicio, h_fin)
-        
-        if not pers_libres:
-            print(f"❌ No se encontró personal disponible para '{tipo_buscado}' en ese horario.")
+        # 1. Ruteo lógico para Catálogos (Música y Gastronomía)
+        if tipo_buscado == "musica" or tipo_buscado == "gastronomia":
+            archivo = "data/musica.json" if tipo_buscado == "musica" else "data/catering.json"
+            lista_servicios = fg.cargar_json(archivo)
+            fg.mostrar_opciones(lista_servicios)
+            # Nota: La lógica de selección de estos items se procesa en el Paso 4
+            input("\nPresione Enter para continuar con otra búsqueda...")
             continue
 
-        fg.mostrar_personal(pers_libres)
+        # 2. Ruteo lógico para Personal General (Fotografía, Seguridad, etc.)
+        else:
+            # Usamos la variable 'lista_personal' cargada al inicio del programa
+            # Importante: Usar 'fecha_str' que definiste en el Paso 1
+            pers_libres = fg.get_personal_disponible(tipo_buscado, lista_personal, fecha_str, h_ini, h_fin)
 
-        try:
-            id_p = int(input(f"ID del {tipo_buscado} a contratar (o '0' para buscar otro oficio): "))
-            if id_p == 0:
+            if not pers_libres:
+                print(f"❌ No se encontró personal disponible para '{tipo_buscado}' en ese horario.")
+                input("Presione Enter para intentar con otro oficio...")
                 continue
 
-            dict_trabajador = fg.contratar_personal(lista_personal, id_p)
+            fg.mostrar_personal(pers_libres)
 
-            if dict_trabajador:
-                # Evitar contratar dos veces a la misma persona en la misma boda
-                ya_esta = any(p.id_personal == dict_trabajador['id_personal'] for p in personal_contratado)
-                
-                if ya_esta:
-                    print("⚠️ Este trabajador ya está en tu lista para esta boda.")
+            try:
+                id_p = int(input(f"ID del {tipo_buscado} a contratar (0 para volver): "))
+                if id_p == 0:
+                    continue
+
+                # Buscamos y validamos la contratación
+                dict_trabajador = fg.contratar_personal(lista_personal, id_p)
+
+                if dict_trabajador:
+                    # Evitar duplicados en la lista de contratación actual
+                    if any(p.id_personal == dict_trabajador['id_personal'] for p in personal_contratado):
+                        print("⚠️ Ya has añadido a esta persona a la lista de contratación.")
+                    else:
+                        # Creamos el objeto Personal y lo añadimos a la lista
+                        p_obj = Personal(
+                            dict_trabajador['id_personal'],
+                            dict_trabajador['nombre'],
+                            dict_trabajador['oficio'],
+                            dict_trabajador['sueldo']
+                        )
+                        personal_contratado.append(p_obj)
+                        print(f"✅ {p_obj.nombre} ha sido añadido exitosamente.")
                 else:
-                    # Convertimos a objeto de la clase Personal
-                    p_obj = Personal(
-                        dict_trabajador['id_personal'],
-                        dict_trabajador['nombre'],
-                        dict_trabajador['oficio'],
-                        dict_trabajador['sueldo']
-                    )
-                    personal_contratado.append(p_obj)
-                    print(f"✅ {p_obj.nombre} ({p_obj.oficio}) añadido correctamente.")
-            else:
-                print("❌ ID de trabajador no válido.")
+                    print("❌ ID no encontrado en la lista de personal.")
 
-        except ValueError:
-            print("⚠️ Por favor, ingresa un número de ID válido.")
+            except ValueError:
+                print("⚠️ Error: Debe ingresar un número de ID válido.")
 
-    print(f"\n👍 Selección de personal terminada. Total contratados: {len(personal_contratado)}")
-
+            input("\nPresione Enter para continuar...")
     # --- PASO 4: SELECCIÓN DE SERVICIOS (Catering y Música Extra) ---
     servicios_elegidos = []
 
-    # --- 4.1 Bucle para Catering ---  
+    # --- 4.1 Bucle para Catering ---
     fg.limpiar_pantalla()
     print("--- PASO 4.1: MENÚ DE CATERING ---")
     if tipo_buscado.lower().strip() in ["catering", "todos"]:
@@ -294,7 +317,7 @@ def ejecutar_registro_boda():
         personal_contratado,
         servicios_elegidos,
         fecha_str,
-        h_inicio,
+        h_ini,
         h_fin
     )
 
