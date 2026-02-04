@@ -360,7 +360,7 @@ def ejecutar_registro_boda():
         )
 
         print("\n✅ ¡Boda planificada con éxito!")
-        print("📄 Se ha generado 'resumen_boda.txt' con todos los detalles.")
+        print("📄 Se ha generado 'ticket_boda.txt' con todos los detalles.")
     else:
         print("\nOpciones descartadas. Volviendo al menú...")
 

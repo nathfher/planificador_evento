@@ -1,83 +1,83 @@
 [
     {
-        "id_item": 1,
+        "id_item": 500,
         "categoria": "catering",
         "nombre": "Estación de Quesos Artesanales y Fiambres",
         "cantidad": 200,
         "precio_unidad": 35.0
     },
     {
-        "id_item": 2,
+        "id_item": 501,
         "categoria": "catering",
         "nombre": "Banquete Gala de los Cerezos",
         "cantidad": 150,
         "precio_unidad": 85.0
     },
     {
-        "id_item": 3,
+        "id_item": 502,
         "categoria": "catering",
         "nombre": "Filete Mignon en Salsa de Oporto",
         "cantidad": 150,
         "precio_unidad": 95.0
     },
     {
-        "id_item": 4,
+        "id_item": 503,
         "categoria": "bebida",
         "nombre": "Vino Blanco Albariño",
         "cantidad": 120,
         "precio_unidad": 18.5
     },
     {
-        "id_item": 5,
+        "id_item": 504,
         "categoria": "bebida",
         "nombre": "Champagne Brut Reserva",
         "cantidad": 80,
         "precio_unidad": 45.0
     },
     {
-        "id_item": 6,
+        "id_item": 505,
         "categoria": "postre",
         "nombre": "Pastel de Bodas 5 Pisos",
         "cantidad": 5,
         "precio_unidad": 450.0
     },
     {
-        "id_item": 7,
+        "id_item": 506,
         "categoria": "mobiliario",
         "nombre": "Sillas Crossback de Madera",
         "cantidad": 200,
         "precio_unidad": 5.5
     },
     {
-        "id_item": 8,
+        "id_item": 507,
         "categoria": "mobiliario",
         "nombre": "Vajilla Porcelana Borde Dorado",
         "cantidad": 200,
         "precio_unidad": 8.0
     },
     {
-        "id_item": 9,
+        "id_item": 508,
         "categoria": "mobiliario",
         "nombre": "Calentador de Exterior de Gas",
         "cantidad": 10,
         "precio_unidad": 45.0
     },
     {
-        "id_item": 10,
+        "id_item": 509,
         "categoria": "mobiliario",
         "nombre": "Pista de Baile Modular (m2)",
         "cantidad": 50,
         "precio_unidad": 15.0
     },
     {
-        "id_item": 11,
+        "id_item": 510,
         "categoria": "tecnologia",
         "nombre": "Proyector + Pantalla 100 pulgadas",
         "cantidad": 2,
         "precio_unidad": 85.0
     },
     {
-        "id_item": 12,
+        "id_item": 511,
         "categoria": "decoracion",
         "nombre": "Arco de Ceremonia Minimalista",
         "cantidad": 3,

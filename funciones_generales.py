@@ -29,33 +29,39 @@ def ensure_file_exist(ruta,data_inicial):
                 json.dump({},f,indent=4)
     return data_inicial
 
-def buscar_elemento_id(id_buscado,list_elements):
+def buscar_elemento_id(id_buscado, list_elements, llave_id):
     """
-    Busca un elemento específico dentro de una lista usando su ID único.
-    Si lo encuentra, devuelve el elemento; si no, devuelve None.
+    Busca un ID comparándolo únicamente con la llave específica (ej: 'id_item').
+    Esto evita confusiones entre archivos.
     """
     for element in list_elements:
-        for llave in element:
-            if llave.startswith('id') and element[llave] == id_buscado:
-                return element
+        # Usamos .get() para que si la llave no existe en ese objeto, no explote
+        if element.get(llave_id) == id_buscado:
+            return element
     return None
 
-def actualizar_element(id_element,list_elements,datos_nuevos,element,nombre_archivo):
+def actualizar_element(id_element, list_elements, datos_nuevos, element_tipo, nombre_archivo, llave_id):
     """
-    Busca un elemento por su ID y actualiza sus datos (nombre, email, etc.).
-    Protege los IDs para que no se puedan modificar por error. Al terminar, 
-    guarda los cambios automáticamente en el archivo JSON.
+    Busca un elemento por su ID y actualiza sus datos.
+    - llave_id: debe ser 'id_cliente', 'id_personal', 'id_lugar', etc.
     """
-    datos_antiguos = buscar_elemento_id(id_element,list_elements)
+    # 1. Buscamos usando la llave exacta que pasamos por parámetro
+    datos_antiguos = buscar_elemento_id(id_element, list_elements, llave_id)
+    
     if datos_antiguos is None:
-        print(f'Error: el {element} con ID: {id_element} no existe.')
-        return
-    else:
-        for llave in datos_nuevos: #llave sería nombre,email, id no se puede mod
-            if not llave.startswith('id'):
-                datos_antiguos[llave] = datos_nuevos[llave]
+        print(f"Error: el '{element_tipo}' con ID: {id_element} no existe.")
+        return None
+    
+    # 2. Actualizamos los campos
+    for llave in datos_nuevos:
+        # Protección para que NUNCA se cambie el ID por error
+        if not llave.startswith('id'):
+            datos_antiguos[llave] = datos_nuevos[llave]
+    
+    # 3. Guardamos los cambios en el JSON
     write_json(nombre_archivo, list_elements)
-    print(f"'{element}': {id_element} actualizado.")
+    print(f"✅ '{element_tipo}' con ID: {id_element} actualizado correctamente.")
+    
     return datos_antiguos
 
 #llave_fecha seria  ocuapdas en personal y reservadas en lugar
@@ -65,7 +71,7 @@ def get_inventario_disponibles(id_lugar,fecha_evento,lista_lugares):
     Filtra los objetos del inventario de un lugar específico que no tienen 
     reservas para la fecha indicada. Retorna una lista con los objetos libres.
     """
-    lugar = buscar_elemento_id(id_lugar,lista_lugares)
+    lugar = buscar_elemento_id(id_lugar,lista_lugares,'id_lugar')
     if lugar is None:
         print("El lugar no existe")
         return False
@@ -192,7 +198,7 @@ def contratar_personal(lista_personal,id_personal):
         dict: El diccionario con los datos del trabajador si se encuentra.
         None: Si el ID no existe en la lista, permitiendo manejar el error.
     """
-    trabajador_encontrado = buscar_elemento_id(id_personal,lista_personal)
+    trabajador_encontrado = buscar_elemento_id(id_personal,lista_personal, 'id_personal')
     if trabajador_encontrado is None:
         print('El ID no existe')
         return None
@@ -302,7 +308,7 @@ def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventari
 
 def bloquear_fecha(id_element,list_element,fecha_nueva):
     """Bloquea la fecha que ha sido ocuapda"""
-    exito_element = buscar_elemento_id(id_element,list_element)
+    exito_element = buscar_elemento_id(id_element,list_element, 'id_element')
     if exito_element is None:
         return 'El ID introducido no existe'
     if fecha_nueva not in exito_element['fechas_ocupadas']:
@@ -339,7 +345,7 @@ def procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_
     for item in cotizacion['items_pedidos']:
         for inv in lista_inventario:
             # Buscamos por ID que es más seguro que el nombre
-            if inv['id_item'] == item.id_item:
+            if inv['id_item'] == item.id_item_reserva:
                 inv['cantidad'] -= item.cantidad_requerida
 
     print("¡SISTEMA ACTUALIZADO! Todos los recursos han sido bloqueados.")
@@ -373,36 +379,24 @@ def guardar_reserva_json(nueva_boda):
     print("✅ La boda se guardó correctamente en el historial.")
 
 def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario):
-    """
-    Limpia el sistema de forma integral. 
-    Elimina los bloques horarios de lugares/personal y devuelve el stock al inventario.
-    """
     fecha_boda = cotizacion['fecha']
 
-    # 1. Liberar el lugar (Buscamos el bloque horario específico)
-    lugar = buscar_elemento_id(cotizacion['id_lugar'], lista_lugares)
+    # 1. Liberar lugar
+    lugar = buscar_elemento_id(cotizacion['id_lugar'], lista_lugares, 'id_lugar')
     if lugar:
-        # Filtramos la lista para quitar el bloque de esta boda
         lugar['fechas_ocupadas'] = [f for f in lugar['fechas_ocupadas'] if f['fecha'] != fecha_boda]
 
-    # 2. Liberar al personal
+    # 2. Liberar personal
     for p_contratado in cotizacion['personal_contratado']:
-        # Buscamos al trabajador en la lista maestra
-        p_maestro = buscar_elemento_id(p_contratado.id_personal, lista_personal)
+        p_maestro = buscar_elemento_id(p_contratado.id_personal, lista_personal, 'id_personal')
         if p_maestro:
             p_maestro['fechas_ocupadas'] = [f for f in p_maestro['fechas_ocupadas'] if f['fecha'] != fecha_boda]
 
+    # 3. Devolver Inventario
     for servicio in cotizacion['items_pedidos']:
         for item_inv in lista_inventario:
-            if item_inv['id_item'] == servicio.id_item_reserva: # Usa el ID único
+            if item_inv['id_item'] == servicio.id_item_reserva:
                 item_inv['cantidad'] += servicio.cantidad_requerida
-
-    # 4. Guardado masivo y limpio
-    write_json('data/lugares.json', lista_lugares)
-    write_json('data/personal.json', lista_personal)
-    write_json('data/inventario.json', lista_inventario)
-    print("♻️ Recursos liberados y stock restaurado.")
-
 
 def generar_ticket(cliente, lugar, personal, servicios, subtotal, comision, total, fecha_boda):
     with open("ticket_boda.txt", "w", encoding="utf-8") as f:
