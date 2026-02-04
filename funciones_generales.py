@@ -247,13 +247,13 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
     cotizacion_final = {
         'id_lugar': lug_elegido['id_lugar'],
         'nombre_lugar': lug_elegido['nombre'], # Útil para el ticket
-        'cliente': cliente.nombre,
+        'cliente': cliente['nombre'],
         'fecha': fecha,
         'h_inicio': h_inicio,      # <--- GUARDADO
         'h_fin': h_fin,            # <--- GUARDADO
         'personal_contratado': sel_pers, 
         'items_pedidos': lista_items,
-        'subtotal': costo_inv + costo_lug + costo_pers,
+        'subtotal': subtotal,
         'comision': comision_val,
         'total_final': total, # Cambié 'total' por 'total_final' para coincidir con tu pl_boda
         'estado': 'Pendiente'
@@ -335,11 +335,12 @@ def procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_
         for p_total in lista_personal:
             if p_total['id_personal'] == p_contratado.id_personal:
                 p_total['fechas_ocupadas'].append(bloque)
-    # 4. DESCUENTO DE INVENTARIO (Pools de Recursos)
+    # 4. DESCUENTO DE INVENTARIO
     for item in cotizacion['items_pedidos']:
         for inv in lista_inventario:
-            if inv['nombre'].lower() in item.nombre.lower():
-                inv['cantidad'] -= item.cantidad_requerida
+            # Buscamos por ID que es más seguro que el nombre
+            if inv['id_item'] == item.id_item:
+                inv['cantidad'] -= item.cantidad_requerida 
 
     print("¡SISTEMA ACTUALIZADO! Todos los recursos han sido bloqueados.")
 

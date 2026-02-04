@@ -1,66 +1,84 @@
 [
-    {   "id_item": 1,
-        "categoria": "Aperitivos",
+    {
+        "id_item": 1,
+        "categoria": "catering",
         "nombre": "Estación de Quesos Artesanales y Fiambres",
         "cantidad": 200,
         "precio_unidad": 35.0
     },
-    {   "id_item": 2,
-        "categoria": "Gastronomía",
+    {
+        "id_item": 2,
+        "categoria": "catering",
         "nombre": "Banquete Gala de los Cerezos",
         "cantidad": 150,
         "precio_unidad": 85.0
     },
-    {   "id_item": 3,
-        "categoria": "Gastronomía",
+    {
+        "id_item": 3,
+        "categoria": "catering",
         "nombre": "Filete Mignon en Salsa de Oporto",
         "cantidad": 150,
         "precio_unidad": 95.0
     },
-    {   "id_item": 5,
-        "categoria": "Bebidas",
+    {
+        "id_item": 4,
+        "categoria": "bebida",
         "nombre": "Vino Blanco Albariño",
         "cantidad": 120,
         "precio_unidad": 18.5
     },
-    {   "id_item": 6,
-        "categoria": "Bebidas",
+    {
+        "id_item": 5,
+        "categoria": "bebida",
         "nombre": "Champagne Brut Reserva",
         "cantidad": 80,
         "precio_unidad": 45.0
     },
-    {   "id_item": 7,
-        "categoria": "Postres",
+    {
+        "id_item": 6,
+        "categoria": "postre",
         "nombre": "Pastel de Bodas 5 Pisos",
         "cantidad": 5,
         "precio_unidad": 450.0
     },
-    {   "id_item": 1,       
+    {
+        "id_item": 7,
+        "categoria": "mobiliario",
         "nombre": "Sillas Crossback de Madera",
         "cantidad": 200,
         "precio_unidad": 5.5
     },
-    {   "id_item": 2,
+    {
+        "id_item": 8,
+        "categoria": "mobiliario",
         "nombre": "Vajilla Porcelana Borde Dorado",
         "cantidad": 200,
         "precio_unidad": 8.0
     },
-    {   "id_item": 5,
+    {
+        "id_item": 9,
+        "categoria": "mobiliario",
         "nombre": "Calentador de Exterior de Gas",
         "cantidad": 10,
         "precio_unidad": 45.0
     },
-    {   "id_item": 6,
+    {
+        "id_item": 10,
+        "categoria": "mobiliario",
         "nombre": "Pista de Baile Modular (m2)",
         "cantidad": 50,
         "precio_unidad": 15.0
     },
-    {   "id_item": 7,
+    {
+        "id_item": 11,
+        "categoria": "tecnologia",
         "nombre": "Proyector + Pantalla 100 pulgadas",
         "cantidad": 2,
         "precio_unidad": 85.0
     },
-    {   "id_item": 8,
+    {
+        "id_item": 12,
+        "categoria": "decoracion",
         "nombre": "Arco de Ceremonia Minimalista",
         "cantidad": 3,
         "precio_unidad": 120.0

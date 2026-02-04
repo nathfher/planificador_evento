@@ -29,8 +29,6 @@ def ejecutar_registro_boda():
     lista_personal = fg.ensure_file_exist('data/personal.json', [])
     lista_inventario = fg.ensure_file_exist('data/inventario.json', [])
     lista_clientes = fg.ensure_file_exist("data/clientes.json", [])
-    lista_catering = fg.ensure_file_exist('data/catering.json', [])
-    lista_musica = fg.ensure_file_exist('data/musica.json', [])
 
     if not lista_lugares:
         print("❌ ERROR CRÍTICO: No se puede planear una boda sin lugares en la base de datos.")
@@ -265,66 +263,58 @@ def ejecutar_registro_boda():
             print("⚠️ Error: Use solo números para el ID.")
             input("Presione Enter...") # PAUSA 4
 
-    # --- PASO 4: SELECCIÓN DE SERVICIOS (CATÁLOGOS) ---
-    # Definimos los catálogos para procesarlos en un solo bucle limpio
-    catalogos = [
-        {"nombre": "CATERING", "lista": lista_catering},
-        {"nombre": "MÚSICA", "lista": lista_musica}
-    ]
+    # --- PASO 4: SELECCIÓN DE INVENTARIO UNIFICADO ---
+    # Cubrimos: catering, bebida, postre, mobiliario, tecnologia y decoracion
+    categorias_inv = ["catering", "bebida", "postre", "mobiliario", "tecnologia", "decoracion"]
 
-    for cat in catalogos:
+    for cat in categorias_inv:
         fg.limpiar_pantalla()
-        print(f"--- PASO 4: MENÚ DE {cat['nombre']} ---")
-        for item in cat['lista']:
-            print(f"ID: {item['id_item']} | {item['nombre']} | ${item['precio_unidad']}")
+        print(f"--- PASO 4: SELECCIÓN DE {cat.upper()} (Presupuesto: ${cliente_actual.presupuesto}) ---")
+
+        # Filtramos el inventario general por la categoría actual
+        items_categoria = [i for i in lista_inventario if i.get('categoria') == cat]
+
+        if not items_categoria:
+            continue # Si no hay nada de esa categoría, saltamos a la siguiente
+
+        for item in items_categoria:
+            print(f"ID: {item['id_item']} | {item['nombre'].ljust(30)} | ${item['precio_unidad']} | Stock: {item['cantidad']}")
 
         while True:
-            op = input(f"\nID de {cat['nombre']} (o '0' para siguiente): ")
-            if op == '0': 
-                break
+            op = input(f"\nID de {cat} (o '0' para siguiente categoría): ")
+            if op == '0': break
 
             try:
                 id_sel = int(op)
-                seleccionado = next((x for x in cat['lista'] if x['id_item'] == id_sel), None)
+                seleccionado = next((x for x in items_categoria if x['id_item'] == id_sel), None)
 
                 if seleccionado:
-                    # --- AQUÍ VA LA VALIDACIÓN PREVENTIVA ---
-                    if "gala" in seleccionado['nombre'].lower():
-                        print("\n" + "!"*45)
-                        print("⚠️  ATENCIÓN: Los servicios de 'Gala' requieren")
-                        print("   contratar 'Maquillaje y Peinado' más adelante.")
-                        print("!"*45 + "\n")
-
-                        confirmar = input("¿Está de acuerdo en añadir este requisito a su búsqueda de personal posterior? (S/N): ").upper().strip()
-                        if confirmar != 'S':
-                            print("❌ Selección cancelada. Para elegir este menú debe aceptar el protocolo.")
-                            continue # Salta el resto del bucle y pide otro ID
                     cant = int(input(f"¿Cantidad de {seleccionado['nombre']}?: "))
+                    costo_total_item = seleccionado['precio_unidad'] * cant
 
-                    # Validación de Inventario unificada
-                    recurso = next((i for i in lista_inventario if i['nombre'].lower() in seleccionado['nombre'].lower()), None)
-
-                    if recurso and recurso['cantidad'] < cant:
-                        print(f"❌ Stock insuficiente. Solo quedan {recurso['cantidad']}.")
+                    if seleccionado['cantidad'] < cant:
+                        print(f"❌ Stock insuficiente. Solo quedan {seleccionado['cantidad']}.")
+                    elif costo_total_item > cliente_actual.presupuesto:
+                        print(f"❌ No hay presupuesto. Costo: ${costo_total_item} | Tienes: ${cliente_actual.presupuesto}")
                     else:
-                        servicios_elegidos.append(ItemReserva(seleccionado['id_item'], seleccionado['nombre'], seleccionado['precio_unidad'], cant))
-                        print(f"✅ {seleccionado['nombre']} añadido.")
+                        # DESCUENTO TEMPORAL Y REGISTRO
+                        cliente_actual.presupuesto -= costo_total_item
+                        # No restamos del JSON aquí, solo de la lista en memoria
+                        seleccionado['cantidad'] -= cant
+                        
+                        servicios_elegidos.append(ItemReserva(
+                            seleccionado['id_item'],
+                            seleccionado['nombre'],
+                            seleccionado['precio_unidad'],
+                            cant
+                        ))
+                        print(f"✅ {seleccionado['nombre']} añadido. Presupuesto restante: ${cliente_actual.presupuesto}")
                 else:
-                    print("❌ ID no encontrado.")
+                    print("❌ ID no válido para esta categoría.")
             except ValueError:
                 print("⚠️ Ingrese solo números.")
-    # --- PASO 4.3: VALIDACIÓN INTELIGENTE ---
-    valido, mensaje = fg.validar_restricciones_inteligentes(personal_contratado,
-                                                            servicios_elegidos,
-                                                            lugar_seleccionado)
 
-    if not valido:
-        print("\n" + "!"*40)
-        print(f"ATENCIÓN: {mensaje}")
-        print("!"*40)
-        print("\nNo podemos proceder con esta configuración. Ajuste sus selecciones.")
-        input("Presione Enter para volver al menú...")
-        return # Aquí cortamos la ejecución y regresamos al menú principal
+        input("\nPresione Enter para pasar a la siguiente categoría...")
 
     # --- PASO 5: CÁLCULOS Y COTIZACIÓN ---
     # build_cotizacion usa el string de fecha para el registro
