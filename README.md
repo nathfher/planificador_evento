@@ -1,9 +1,9 @@
 # Informe de Proyecto: Raquel & Alba Planner
 
 ## 1. Introducción y el "Porqué" de este proyecto
-Este proyecto se llama **Raquel & Alba Planner** y nace inspirado en uno de los momentos más caóticos de la serie *La que se avecina*. Se tomó como ejemplo el episodio donde Raquel Villanueva y Alba Recio intentan organizar la boda de Diego, el amor platónico de la secundaria de Raquel.
+Este proyecto se llama **Raquel & Alba Planner** y nace inspirado en uno de los momentos más gracisosos de la serie *La que se avecina*. Se tomó como ejemplo el episodio donde Raquel Villanueva y Alba Recio intentan organizar la boda de Diego, el amor platónico de la secundaria de Raquel.
 
-En la serie, aquel evento fue el primero y el último que hicieron, y terminó siendo un desastre total. El problema fue que Diego se casaba con la que era la mejor amiga de Raquel (llevaban 20 años juntos) y los sentimientos de Raquel arruinaron la logística. Este software se creó precisamente para evitar que los "dramas" arruinen un negocio. Se pensó en un sistema que sea el "organizador con cabeza fría" que ellas no tuvieron, asegurando que todo salga perfecto, aunque el organizador tenga el corazón roto.
+En la serie, aquel evento fue el primero y el último que hicieron, y terminó siendo un desastre total. El problema fue que Diego se casaba con la que era la mejor amiga de Raquel (llevaban 20 años juntos) y los sentimientos de Raquel arruinaron la logística. Este software se creó precisamente para evitar que los "dramas" arruinen un negocio. Se pensó en un sistema que sea el "organizador con cabeza fría" que ellas no tuvieron, asegurando que todo salga perfecto.
 
 El proyecto Raquel & Alba Planner consiste en un sistema de gestión integral para la planificación de eventos nupciales. Este permite gestionar eventos donde se coordinan múltiples variables críticas:
 **Recursos: Se manejan catálogos de sedes (salones, jardines), personal (fotógrafos, seguridad, barmans) e inventario físico (catering, mobiliario, tecnología).
