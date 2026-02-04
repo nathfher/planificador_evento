@@ -1,6 +1,6 @@
 [
     {
-        "id_lugar": 1,
+        "id_lugar": 21,
         "nombre": "Jard\u00edn de los Cerezos",
         "capacidad": 150,
         "precio": 2500,
@@ -12,7 +12,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_lugar": 2,
+        "id_lugar": 22,
         "nombre": "Palacio de Cristal",
         "capacidad": 350,
         "precio": 5500,
@@ -24,7 +24,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_lugar": 3,
+        "id_lugar": 23,
         "nombre": "Terraza del Sol",
         "capacidad": 80,
         "precio": 1500,

@@ -25,7 +25,7 @@ def ver_historial():
 
     reservas = fg.ensure_file_exist('data/historial_reservas.json', [])
     ganancia_total_empresa = 0
-    
+
     if not reservas:
         print("⚠️ No se encontraron bodas registradas en el historial.")
     else:

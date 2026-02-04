@@ -282,7 +282,8 @@ def ejecutar_registro_boda():
 
         while True:
             op = input(f"\nID de {cat} (o '0' para siguiente categoría): ")
-            if op == '0': break
+            if op == '0': 
+                break
 
             try:
                 id_sel = int(op)
@@ -301,7 +302,7 @@ def ejecutar_registro_boda():
                         cliente_actual.presupuesto -= costo_total_item
                         # No restamos del JSON aquí, solo de la lista en memoria
                         seleccionado['cantidad'] -= cant
-                        
+
                         servicios_elegidos.append(ItemReserva(
                             seleccionado['id_item'],
                             seleccionado['nombre'],

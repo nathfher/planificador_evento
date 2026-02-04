@@ -1,6 +1,6 @@
 [
     {
-        "id_personal": 1,
+        "id_personal": 100,
         "nombre": "Ana Fotografía",
         "oficio": "Fotógrafa",
         "categoria": "fotografia",
@@ -8,7 +8,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 2,
+        "id_personal": 101,
         "nombre": "Ana Heredia",
         "oficio": "Wedding Planner",
         "categoria": "planificador",
@@ -16,7 +16,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 3,
+        "id_personal": 102,
         "nombre": "Roberto Juez",
         "oficio": "Maestro de Ceremonias",
         "categoria": "oficiante",
@@ -24,7 +24,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 4,
+        "id_personal": 103,
         "nombre": "Miley Style",
         "oficio": "Maquillaje y Peinado",
         "categoria": "estetica",
@@ -32,7 +32,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 5,
+        "id_personal": 104,
         "nombre": "Arte y Flores",
         "oficio": "Decorador / Florista",
         "categoria": "decoracion",
@@ -40,7 +40,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 6,
+        "id_personal": 105,
         "nombre": "Seguridad Total",
         "oficio": "Seguridad y Valet Parking",
         "categoria": "seguridad",
@@ -48,7 +48,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 7,
+        "id_personal": 106,
         "nombre": "Julián Sommelier",
         "oficio": "Sommelier / Barman especializado",
         "categoria": "barman",
@@ -56,7 +56,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 8,
+        "id_personal": 107,
         "nombre": "Miriam Ochoa",
         "oficio": "Wedding Planner",
         "categoria": "planificador",
@@ -64,7 +64,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 9,
+        "id_personal": 108,
         "nombre": "Mariam Fotografía",
         "oficio": "Fotógrafa",
         "categoria": "fotografia",
@@ -72,7 +72,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 10,
+        "id_personal": 109,
         "nombre": "Antonio Juez",
         "oficio": "Maestro de Ceremonias",
         "categoria": "oficiante",
@@ -80,7 +80,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 11,
+        "id_personal": 110,
         "nombre": "Erika Style",
         "oficio": "Maquillaje y Peinado",
         "categoria": "estetica",
@@ -88,7 +88,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 12,
+        "id_personal": 111,
         "nombre": "Arte y Luces",
         "oficio": "Luces / Iluminacion",
         "categoria": "decoracion",
@@ -96,7 +96,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 13,
+        "id_personal": 112,
         "nombre": "Seguridad Total",
         "oficio": "Seguridad y Valet Parking",
         "categoria": "seguridad",
@@ -104,7 +104,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_personal": 14,
+        "id_personal": 113,
         "nombre": "Alejandro Sommelier",
         "oficio": "Sommelier / Barman especializado",
         "categoria": "barman",
@@ -112,7 +112,7 @@
         "fechas_ocupadas": []
     },
 {
-        "id_item": 15,
+        "id_item": 114,
         "nombre": "DJ Alan",
         "oficio": "DJ / Animador de Eventos",
         "categoria": "musica",
@@ -120,7 +120,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_item": 16,
+        "id_item": 115,
         "nombre": "Banda de Jazz 'Blue Note'",
         "oficio": "Agrupación Musical de Jazz",
         "categoria": "musica",
@@ -128,7 +128,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_item": 17,
+        "id_item": 116,
         "nombre": "Mariachi Real de Oro",
         "oficio": "Música Regional / Mariachi",
         "categoria": "musica",
@@ -136,7 +136,7 @@
         "fechas_ocupadas": []
     },
     {
-        "id_item": 19,
+        "id_item": 117,
         "nombre": "Banda de Rock/Pop 'Los 80s'",
         "oficio": "Banda de Versatilidad / Rock",
         "categoria": "musica",

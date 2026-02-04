@@ -82,21 +82,21 @@ def hay_conflicto_horario(lista_reservas, fecha_nueva, h_ini_nueva, h_fin_nueva)
     for reserva in lista_reservas:
         # PRIMERO: Nos aseguramos de que 'reserva' sea un diccionario
         if not isinstance(reserva, dict):
-            continue 
-            
+            continue
+
         if reserva.get('fecha') == fecha_nueva:
             # Extraemos horas y convertimos a objetos time para comparar
             formato = "%H:%M"
             h_ini_ex = datetime.strptime(reserva['hora_inicio'], formato).time()
             h_fin_ex = datetime.strptime(reserva['hora_fin'], formato).time()
-            
+
             nueva_ini = datetime.strptime(h_ini_nueva, formato).time()
             nueva_fin = datetime.strptime(h_fin_nueva, formato).time()
 
             # Lógica de colisión de intervalos
             if (nueva_ini < h_fin_ex) and (nueva_fin > h_ini_ex):
                 return True # ¡Hay choque!
-    return False 
+    return False
 
 
 def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
@@ -116,11 +116,11 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
             categoria_trabajador = p.get('categoria', p.get('oficio', '')).lower().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
 
             if busqueda in categoria_trabajador:
-                
+
                 # 3. FILTRO DE FECHA (Bloqueos totales por vacaciones/feriados)
                 fechas_bloqueadas = p.get('fechas_ocupadas', [])
                 if fecha in fechas_bloqueadas:
-                    continue 
+                    continue
 
                 # 4. FILTRO DE HORARIO (Agenda del día)
                 agenda_dia = p.get('agenda', {}).get(fecha, [])
@@ -133,9 +133,9 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
                     # Lógica de solapamiento
                     if boda_inicio < hora_ocu_fin and boda_fin > hora_ocu_ini:
                         hay_conflicto = True
-                        break 
+                        break
 
-                # 5. RESULTADO FINAL (CORREGIDO)
+                # 5. RESULTADO FINAL
                 # Debe estar FUERA del bucle 'for intervalo', pero DENTRO del 'if busqueda'
                 if not hay_conflicto:
                     disponibles.append(p)
@@ -207,7 +207,7 @@ def calcular_costo_inventario(lista_items):
     total = 0
     for i in lista_items:
         # Como 'i' es un objeto de clase ItemReserva, usamos sus funciones
-        total += i.calcular_subtotal() 
+        total += i.calcular_subtotal()
     return total
 
 def calculate_total(costo_inv: float,
@@ -247,7 +247,7 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
     cotizacion_final = {
         'id_lugar': lug_elegido['id_lugar'],
         'nombre_lugar': lug_elegido['nombre'], # Útil para el ticket
-        'cliente': cliente['nombre'],
+        'cliente': cliente.nombre,
         'fecha': fecha,
         'h_inicio': h_inicio,      # <--- GUARDADO
         'h_fin': h_fin,            # <--- GUARDADO
@@ -340,7 +340,7 @@ def procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_
         for inv in lista_inventario:
             # Buscamos por ID que es más seguro que el nombre
             if inv['id_item'] == item.id_item:
-                inv['cantidad'] -= item.cantidad_requerida 
+                inv['cantidad'] -= item.cantidad_requerida
 
     print("¡SISTEMA ACTUALIZADO! Todos los recursos han sido bloqueados.")
 
@@ -384,7 +384,7 @@ def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario
     if lugar:
         # Filtramos la lista para quitar el bloque de esta boda
         lugar['fechas_ocupadas'] = [f for f in lugar['fechas_ocupadas'] if f['fecha'] != fecha_boda]
-    
+
     # 2. Liberar al personal
     for p_contratado in cotizacion['personal_contratado']:
         # Buscamos al trabajador en la lista maestra
@@ -392,9 +392,9 @@ def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario
         if p_maestro:
             p_maestro['fechas_ocupadas'] = [f for f in p_maestro['fechas_ocupadas'] if f['fecha'] != fecha_boda]
 
-    for servicio in cotizacion['items_pedidos']: # Cambiado de 'servicios_elegidos' a 'items_pedidos'
+    for servicio in cotizacion['items_pedidos']:
         for item_inv in lista_inventario:
-            if item_inv['nombre'].lower() in servicio.nombre.lower():
+            if item_inv['id_item'] == servicio.id_item_reserva: # Usa el ID único
                 item_inv['cantidad'] += servicio.cantidad_requerida
 
     # 4. Guardado masivo y limpio

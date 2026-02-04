@@ -75,8 +75,8 @@ class ItemReserva:
     Esta clase actúa como un vínculo entre el catálogo general y una boda específica,
     permitiendo calcular costos según la demanda (ej. 100 platos de comida).
     """
-    def __init__(self, id_item_reserva, nombre, precio_unidad, cantidad_requerida):
-        self.id_item_reserva = id_item_reserva
+    def __init__(self, id_item, nombre, precio_unidad, cantidad_requerida):
+        self.id_item_reserva = id_item
         self.nombre = nombre
         self.precio_unidad = precio_unidad
         self.cantidad_requerida = cantidad_requerida
