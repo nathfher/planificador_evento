@@ -362,6 +362,7 @@ def ejecutar_registro_boda():
     )
 
     if confirmado:
+        fg.procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_inventario)
         # 1. GUARDAR CAMBIOS EN JSON (Persistencia)
         fg.write_json('data/lugares.json', lista_lugares)
         fg.write_json('data/personal.json', lista_personal)

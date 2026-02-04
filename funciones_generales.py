@@ -40,47 +40,6 @@ def buscar_elemento_id(id_buscado, list_elements, llave_id):
             return element
     return None
 
-def actualizar_element(id_element, list_elements, datos_nuevos, element_tipo, nombre_archivo, llave_id):
-    """
-    Busca un elemento por su ID y actualiza sus datos.
-    - llave_id: debe ser 'id_cliente', 'id_personal', 'id_lugar', etc.
-    """
-    # 1. Buscamos usando la llave exacta que pasamos por parámetro
-    datos_antiguos = buscar_elemento_id(id_element, list_elements, llave_id)
-    
-    if datos_antiguos is None:
-        print(f"Error: el '{element_tipo}' con ID: {id_element} no existe.")
-        return None
-    
-    # 2. Actualizamos los campos
-    for llave in datos_nuevos:
-        # Protección para que NUNCA se cambie el ID por error
-        if not llave.startswith('id'):
-            datos_antiguos[llave] = datos_nuevos[llave]
-    
-    # 3. Guardamos los cambios en el JSON
-    write_json(nombre_archivo, list_elements)
-    print(f"✅ '{element_tipo}' con ID: {id_element} actualizado correctamente.")
-    
-    return datos_antiguos
-
-#llave_fecha seria  ocuapdas en personal y reservadas en lugar
-
-def get_inventario_disponibles(id_lugar,fecha_evento,lista_lugares):
-    """
-    Filtra los objetos del inventario de un lugar específico que no tienen 
-    reservas para la fecha indicada. Retorna una lista con los objetos libres.
-    """
-    lugar = buscar_elemento_id(id_lugar,lista_lugares,'id_lugar')
-    if lugar is None:
-        print("El lugar no existe")
-        return False
-    inventario_libre = []
-    for objeto in lugar['inventario']:
-        if fecha_evento not in objeto['fechas ocupadas']:
-            inventario_libre.append(objeto)
-    return inventario_libre
-
 def hay_conflicto_horario(lista_reservas, fecha_nueva, h_ini_nueva, h_fin_nueva):
     """
     Comprueba si el nuevo horario choca con las reservas existentes.
@@ -268,27 +227,6 @@ def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inici
     return cotizacion_final
 
 
-def guardar_cotizacion(cotizacion_reciente, list_cotizaciones):
-    """Agrega una nueva cotización al historial y la guarda en el archivo físico.
-
-    Esta función actualiza la lista de cotizaciones en la memoria del programa 
-    y sincroniza esos cambios con el archivo 'cotizaciones.json' para que 
-    la información sea persistente.
-
-    Args:
-        cotizacion_reciente (dict): El diccionario que contiene todos los datos 
-            de la cotización que se acaba de generar.
-        list_cotizaciones (list): La lista que contiene todas las cotizaciones 
-            previas cargadas desde el sistema.
-
-    Returns:
-        None: La función no devuelve valores, realiza una acción de guardado 
-            y muestra un mensaje de confirmación"""
-    list_cotizaciones.append(cotizacion_reciente)
-    write_json('cotizaciones.json', list_cotizaciones)
-    print("Cotización guardada en el historial.")
-
-
 def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventario):
     """Evita reservas accidentales, avisa si se gaurda la cot o no con bool"""
     print(f"RESUMEN DE COTIZACIÓN PARA: {cotizacion['cliente']}")
@@ -304,23 +242,6 @@ def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventari
         print("Cotización rechazada. Liberando recursos...")
         # AQUÍ RESOLVEMOS EL DETALLE:
         liberar_recursos(cotizacion, lista_lugares, lista_personal,lista_inventario)
-        return False
-
-def bloquear_fecha(id_element,list_element,fecha_nueva):
-    """Bloquea la fecha que ha sido ocuapda"""
-    exito_element = buscar_elemento_id(id_element,list_element, 'id_element')
-    if exito_element is None:
-        return 'El ID introducido no existe'
-    if fecha_nueva not in exito_element['fechas_ocupadas']:
-        exito_element['fechas_ocupadas'].append(fecha_nueva)
-        # 2. Identificamos si es lugar o personal para dar el mensaje correcto
-        if 'id_lugar' in exito_element:
-            print(f"✅ El lugar: {exito_element['nombre']} bloqueado para el {fecha_nueva}")
-        elif 'id_personal' in exito_element:
-            print(f"✅ El trabajador: {exito_element['nombre']} bloqueado para el {fecha_nueva}")
-        return True
-    else:
-        print(f"❌ Error: La fecha {fecha_nueva} ya está ocupada para {exito_element['nombre']}")
         return False
 
 def procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_inventario):
@@ -375,7 +296,7 @@ def guardar_reserva_json(nueva_boda):
     # 5. Escribimos la lista completa de nuevo en el archivo
     with open(nombre_archivo, 'w', encoding='utf-8') as f:
         json.dump(historial, f, indent=4, ensure_ascii=False)
-    
+
     print("✅ La boda se guardó correctamente en el historial.")
 
 def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario):
@@ -403,7 +324,7 @@ def generar_ticket(cliente, lugar, personal, servicios, subtotal, comision, tota
         f.write("==========================================\n")
         f.write("          TICKET DE RESERVA - BODA        \n")
         f.write("==========================================\n\n")
-        
+
         # Uso de 'cliente' y 'fecha_boda'
         f.write(f"CLIENTE: {cliente.nombre}\n")
         f.write(f"EMAIL: {cliente.email}\n")
@@ -452,7 +373,7 @@ def validar_restricciones_inteligentes(personal_contratado, servicios_elegidos, 
     oficios_p = [p.oficio.lower() for p in personal_contratado]
     nombres_s = [s.nombre.lower() for s in servicios_elegidos]
     nombre_lugar = lugar_seleccionado['nombre'].lower()
-    
+
     # --- REGLA 1: CO-REQUISITOS (Necesitas A para tener B) ---
 
     # Si eligen 'Barra Libre de Coctelería' (catering.json)
