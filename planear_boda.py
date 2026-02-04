@@ -27,7 +27,6 @@ def ejecutar_registro_boda():
     print("--- PASO 1: REGISTRO DEL CLIENTE ---")
 
     # --- PASO 2: REGISTRO DEL CLIENTE CON RESTRICCIÓN DE ID ---
-    # --- PASO 2: REGISTRO DEL CLIENTE (VERSIÓN ANTIBALAS) ---
     while True:
         try:
             # 1. VALIDAR ID (1000 - 10000)
@@ -127,14 +126,6 @@ def ejecutar_registro_boda():
         except ValueError:
             print("❌ Formato de hora inválido. Debe usar HH:MM (ej: 14:00, 09:30).")
             print("   No se aceptan números solos o letras.")
-
-    # --- GUARDAR DATOS DEL CLIENTE (Al final de las validaciones) ---
-    cliente_actual = Cliente(id_client, name_client, correo_temp, invitados_val, presupuesto_val)
-    lista_clientes.append(cliente_actual.to_dict())
-    fg.write_json('data/clientes.json', lista_clientes)
-
-    print(f"\n✅ Cliente {cliente_actual.nombre} y horario registrados con éxito.")
-    input("Presione Enter para elegir el lugar...")
 
     # --- PASO 3: SELECCIÓN DE LUGAR ---
     fg.limpiar_pantalla()
@@ -293,8 +284,14 @@ def ejecutar_registro_boda():
             continue
 
         # Tabla alineada con ljust y rjust
-        print("ID".ljust(5) | "Producto".ljust(30) | "Precio".rjust(10) | "Stock")
-        print("-" * 55)
+        encabezado = (
+            f"{'ID'.ljust(6)} | "
+            f"{'PRODUCTO'.ljust(25)} | "
+            f"{'PRECIO U.'.rjust(10)} | "
+            f"{'STOCK'.rjust(7)}"
+        )
+        print(encabezado)
+        print("-" * 65)
         for item in items_categoria:
             print(
                 f"{str(item['id_item']).ljust(5)} | "
@@ -343,8 +340,8 @@ def ejecutar_registro_boda():
 
         input("\nPresione Enter para pasar a la siguiente categoría...")
 
-    # --- PASO 5: CÁLCULOS Y COTIZACIÓN ---
-    # build_cotizacion usa el string de fecha para el registro
+# --- PASO 5: CÁLCULOS Y COTIZACIÓN ---
+    # build_cotizacion genera el objeto/diccionario con todos los costos
     cotizacion = fg.build_cotizacion(
         cliente_actual,
         lugar_seleccionado,
@@ -356,24 +353,22 @@ def ejecutar_registro_boda():
     )
 
     # --- PASO 6: CIERRE Y BLOQUEO ---
-    # approve_cotizacion muestra el resumen y pide confirmación (S/N)
-    if fg.approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventario):
+    # Pasamos las listas para que, si confirma, la función pueda actualizar el stock
+    confirmado = fg.approve_cotizacion(
+        cotizacion,
+        lista_lugares,
+        lista_personal,
+        lista_inventario
+    )
 
-        # Procesa bloqueos de fechas en listas y resta inventario
-        fg.procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_inventario)
-
-        # Guardar cambios en archivos físicos
+    if confirmado:
+        # 1. GUARDAR CAMBIOS EN JSON (Persistencia)
         fg.write_json('data/lugares.json', lista_lugares)
         fg.write_json('data/personal.json', lista_personal)
         fg.write_json('data/inventario.json', lista_inventario)
 
-        # Generar archivos finales
-        fg.guardar_reserva_json(cotizacion)
-        # fg.generar_ticket(...) # Si tienes la función habilitada
-
-        print("\n✅ ¡Boda planificada y recursos bloqueados con éxito!")
-        # 3. GENERACIÓN DEL TICKET TXT (Lo que te faltaba)
-        # Usamos los datos calculados en 'cotizacion'
+        # 2. GENERACIÓN DEL TICKET TXT
+        # Usamos los datos calculados para que el cliente tenga su comprobante
         fg.generar_ticket(
             cliente_actual,
             lugar_seleccionado,
@@ -382,13 +377,10 @@ def ejecutar_registro_boda():
             cotizacion['subtotal'],
             cotizacion['comision'],
             cotizacion['total_final'],
-            fecha_boda # El objeto datetime para que el ticket ponga la fecha bonita
+            fecha_boda
         )
-
-        print("\n✅ ¡Boda planificada con éxito!")
-        print("📄 Se ha generado 'ticket_boda.txt' con todos los detalles.")
+        print("\n" + "🎉" * 20)
+        print("¡BODA REGISTRADA Y RESERVADA CON ÉXITO!".center(40))
+        print("🎉" * 20)
     else:
-        print("\nOpciones descartadas. Volviendo al menú...")
-
-if __name__ == "__main__":
-    ejecutar_registro_boda()
+        print("\n⚠️ Registro cancelado. Los recursos no han sido bloqueados.")
