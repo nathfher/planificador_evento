@@ -5,7 +5,6 @@ Este proyecto se llama **Raquel & Alba Planner** y nace inspirado en uno de los 
 
 En la serie, aquel evento fue el primero y el último que hicieron, y terminó siendo un desastre total. El problema fue que Diego se casaba con la que era la mejor amiga de Raquel (llevaban 20 años juntos) y los sentimientos de Raquel arruinaron la logística. Este software se creó precisamente para evitar que los "dramas" arruinen un negocio. Se pensó en un sistema que sea el "organizador con cabeza fría" que ellas no tuvieron, asegurando que todo salga perfecto, aunque el organizador tenga el corazón roto.
 
-**Informe Tecnico**
 El proyecto Raquel & Alba Planner consiste en un sistema de gestión integral para la planificación de eventos nupciales. Este permite gestionar eventos donde se coordinan múltiples variables críticas:
 **Recursos: Se manejan catálogos de sedes (salones, jardines), personal (fotógrafos, seguridad, barmans) e inventario físico (catering, mobiliario, tecnología).
 **Restricciones: Se implementó una lógica de validación que impide el solapamiento de fechas y horas para un mismo recurso, así como reglas de negocio específicas (ej. requisitos de seguridad obligatorios en sedes con piscina o mínimos de mobiliario según el aforo).
