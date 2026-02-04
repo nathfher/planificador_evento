@@ -1,8 +1,8 @@
 [
     {
         "id_personal": 100,
-        "nombre": "Ana Fotografía",
-        "oficio": "Fotógrafa",
+        "nombre": "Ana Fotografa",
+        "oficio": "Fotografa",
         "categoria": "fotografia",
         "sueldo": 800,
         "fechas_ocupadas": []
@@ -49,7 +49,7 @@
     },
     {
         "id_personal": 106,
-        "nombre": "Julián Sommelier",
+        "nombre": "Julian Sommelier",
         "oficio": "Sommelier / Barman especializado",
         "categoria": "barman",
         "sueldo": 450,
@@ -65,8 +65,8 @@
     },
     {
         "id_personal": 108,
-        "nombre": "Mariam Fotografía",
-        "oficio": "Fotógrafa",
+        "nombre": "Mariam Fotografa",
+        "oficio": "Fotografa",
         "categoria": "fotografia",
         "sueldo": 400,
         "fechas_ocupadas": []
@@ -111,8 +111,8 @@
         "sueldo": 450,
         "fechas_ocupadas": []
     },
-{
-        "id_item": 114,
+    {
+        "id_personal": 114,
         "nombre": "DJ Alan",
         "oficio": "DJ / Animador de Eventos",
         "categoria": "musica",
@@ -120,23 +120,23 @@
         "fechas_ocupadas": []
     },
     {
-        "id_item": 115,
+        "id_personal": 115,
         "nombre": "Banda de Jazz 'Blue Note'",
-        "oficio": "Agrupación Musical de Jazz",
+        "oficio": "Agrupacion Musical de Jazz",
         "categoria": "musica",
         "sueldo": 300,
         "fechas_ocupadas": []
     },
     {
-        "id_item": 116,
+        "id_personal": 116,
         "nombre": "Mariachi Real de Oro",
-        "oficio": "Música Regional / Mariachi",
+        "oficio": "Musica Regional / Mariachi",
         "categoria": "musica",
         "sueldo": 280,
         "fechas_ocupadas": []
     },
     {
-        "id_item": 117,
+        "id_personal": 117,
         "nombre": "Banda de Rock/Pop 'Los 80s'",
         "oficio": "Banda de Versatilidad / Rock",
         "categoria": "musica",

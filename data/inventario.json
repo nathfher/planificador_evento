@@ -2,7 +2,7 @@
     {
         "id_item": 500,
         "categoria": "catering",
-        "nombre": "Estación de Quesos Artesanales y Fiambres",
+        "nombre": "Estaci\u00f3n de Quesos Artesanales y Fiambres",
         "cantidad": 200,
         "precio_unidad": 35.0
     },
@@ -23,7 +23,7 @@
     {
         "id_item": 503,
         "categoria": "bebida",
-        "nombre": "Vino Blanco Albariño",
+        "nombre": "Vino Blanco Albari\u00f1o",
         "cantidad": 120,
         "precio_unidad": 18.5
     },

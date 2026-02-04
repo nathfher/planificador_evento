@@ -5,14 +5,25 @@ Este proyecto se llama **Raquel & Alba Planner** y nace inspirado en uno de los 
 
 En la serie, aquel evento fue el primero y el último que hicieron, y terminó siendo un desastre total. El problema fue que Diego se casaba con la que era la mejor amiga de Raquel (llevaban 20 años juntos) y los sentimientos de Raquel arruinaron la logística. Este software se creó precisamente para evitar que los "dramas" arruinen un negocio. Se pensó en un sistema que sea el "organizador con cabeza fría" que ellas no tuvieron, asegurando que todo salga perfecto, aunque el organizador tenga el corazón roto.
 
+**Informe Tecnico**
+El proyecto Raquel & Alba Planner consiste en un sistema de gestión integral para la planificación de eventos nupciales. Este permite gestionar eventos donde se coordinan múltiples variables críticas:
+**Recursos: Se manejan catálogos de sedes (salones, jardines), personal (fotógrafos, seguridad, barmans) e inventario físico (catering, mobiliario, tecnología).
+**Restricciones: Se implementó una lógica de validación que impide el solapamiento de fechas y horas para un mismo recurso, así como reglas de negocio específicas (ej. requisitos de seguridad obligatorios en sedes con piscina o mínimos de mobiliario según el aforo).
+**Eventos: El núcleo del sistema es la "Boda", un evento que vincula a un cliente con una selección finita de recursos bajo un presupuesto controlado.
+
 ## 2. Cómo se organizó el proyecto
 Para que no fuera un lío de códigos, se decidió separar el proyecto en partes fáciles de entender (Estructura de archivos):
 
-* **`data/` (Bases de Datos JSON):** Aquí se guarda la lista de salones, los trabajadores y el inventario. Es como el libro de registros de la agencia para no inventarse cosas.
+* **`data/` (Bases de Datos JSON):** Aquí se guarda la lista de salones, los trabajadores y el inventario. Es como el libro de registros de la agencia.
 * **`funciones_generales.py` (El Cerebro):** Es la parte que hace los cálculos, revisa las reglas y maneja los archivos.
 * **`planear_boda.py` (La Lógica):** Contiene el paso a paso del registro de la boda.
 * **`modulos.py`:** Donde se definen las clases (Cliente, Lugar, etc.).
 * **`main.py` (El Menú):** Es lo que usa el organizador para navegar por el sistema.
+
+**Sleccion de Ideas**
+**Presupuesto Provisional: Se decidió implementar una variable espejo para el presupuesto durante el proceso de selección. Esto permite que el usuario visualice el gasto en tiempo real sin alterar los datos definitivos del cliente hasta que la transacción se confirma.
+
+**Validación Inteligente Post-Selección: En lugar de restringir cada paso individualmente, se diseñó un filtro de seguridad final que analiza la coherencia de toda la boda (ej. verificar si hay suficiente equipo de sonido para la música seleccionada).
 
 ## 3. Las Reglas de Oro (Restricciones)
 Para que la boda no termine en un caos como el de la serie, se implementaron unas reglas que el programa revisa automáticamente:
@@ -20,6 +31,8 @@ Para que la boda no termine en un caos como el de la serie, se implementaron una
 ### I. Cosas que son obligatorias (Inclusión)
 * **Seguridad ante todo:** Si se elige la "Terraza del Sol", como tiene piscina, el sistema obliga a contratar personal de **Seguridad**. Así se evita que algún invitado termine en el agua por los líos de la fiesta.
 * **Protocolo de Gala:** Si el banquete es de lujo, el sistema obliga a contratar **Maquillaje y Peinado**. Se busca que los novios estén impecables y no se descuide la imagen del evento.
+* **Consistencia de Mobiliario:** El sistema cruza los invitados con el inventario. No se permite la reserva si la cantidad de sillas o mesas es inferior al **80% de la capacidad** del lugar.
+* **Infraestructura Tecnológica:** Si se contrata un DJ, Banda de Rock o música en vivo, el sistema exige la inclusión de **"Equipo de Sonido Profesional"**. Así evitamos que el artista llegue y no tenga dónde conectarse.
 
 ### II. Cosas que están prohibidas (Exclusión)
 * **El eco del Palacio de Cristal:** Se bloqueó la opción de llevar **Mariachis** al Palacio de Cristal. Por lógica de sonido, el eco ahí dentro sería un desastre y el sistema no permite ese error.

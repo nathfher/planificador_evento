@@ -21,7 +21,13 @@
             "Escenario para orquesta",
             "Suite para los novios"
         ],
-        "fechas_ocupadas": []
+        "fechas_ocupadas": [
+            {
+                "fecha": "23/08/2034",
+                "inicio": "12:00",
+                "fin": "14:00"
+            }
+        ]
     },
     {
         "id_lugar": 12,

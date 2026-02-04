@@ -191,41 +191,32 @@ def calculate_total(costo_inv: float,
     return costo_total + extras
 
 def build_cotizacion(cliente, lug_elegido, sel_pers, lista_items, fecha, h_inicio, h_fin):
-    """
-    Construye el objeto maestro de la cotización con toda la metadata del evento.
-    
-    Realiza las siguientes acciones:
-    1. Ejecuta los cálculos financieros detallados.
-    2. Registra el bloque horario y calcula la duración del evento.
-    3. Estructura un diccionario final listo para ser guardado o impreso.
-    """
-    # 1. CÁLCULO DE COSTOS
+    # 1. CÁLCULO DE COSTOS BASE
     costo_inv = calcular_costo_inventario(lista_items)
     costo_pers = sum(p.sueldo for p in sel_pers)
     costo_lug = lug_elegido['precio']
 
-    # Calculamos el total (asegúrate de que calculate_total maneje estos 3 montos)
+    # 2. CÁLCULOS FINANCIEROS
     subtotal = costo_inv + costo_lug + costo_pers
     comision_val = subtotal * 0.10  # 10% de Wedding Planner
-    total = calculate_total(costo_inv, costo_pers, costo_lug)
-    # 2. CREAR EL DICCIONARIO FINAL (Incluyendo las nuevas variables)
+    total_final = subtotal + comision_val # <--- AQUÍ: Sumar la comisión al total
+
+    # 3. ESTRUCTURA FINAL
     cotizacion_final = {
         'id_lugar': lug_elegido['id_lugar'],
-        'nombre_lugar': lug_elegido['nombre'], # Útil para el ticket
+        'nombre_lugar': lug_elegido['nombre'],
         'cliente': cliente.nombre,
         'fecha': fecha,
-        'h_inicio': h_inicio,      # <--- GUARDADO
-        'h_fin': h_fin,            # <--- GUARDADO
+        'h_inicio': h_inicio,
+        'h_fin': h_fin,
         'personal_contratado': sel_pers, 
         'items_pedidos': lista_items,
         'subtotal': subtotal,
         'comision': comision_val,
-        'total_final': total, # Cambié 'total' por 'total_final' para coincidir con tu pl_boda
+        'total_final': total_final, # Asegúrate de que este nombre coincida con el ticket
         'estado': 'Pendiente'
     }
-
     return cotizacion_final
-
 
 def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventario):
     """Evita reservas accidentales, avisa si se gaurda la cot o no con bool"""
@@ -245,27 +236,33 @@ def approve_cotizacion(cotizacion, lista_lugares, lista_personal,lista_inventari
         return False
 
 def procesar_confirmacion_boda(cotizacion, lista_lugares, lista_personal, lista_inventario):
-    # Creamos el bloque horario que se guardará en los archivos
+    # este es el bloque horario que se guardará en los archivos
     bloque = {
         "fecha": cotizacion['fecha'],
         "inicio": cotizacion['h_inicio'],
         "fin": cotizacion['h_fin']
     }
 
-    # Bloqueamos el lugar
+    # 1. Bloqueamos el lugar
     for lug in lista_lugares:
         if lug['id_lugar'] == cotizacion['id_lugar']:
-            lug['fechas_ocupadas'].append(bloque) # <--- Guardamos el diccionario
+            if 'fechas_ocupadas' not in lug:
+                lug['fechas_ocupadas'] = []
+            lug['fechas_ocupadas'].append(bloque)
 
-    # Bloqueamos al personal
+    # 2. Bloqueamos al personal
     for p_contratado in cotizacion['personal_contratado']:
         for p_total in lista_personal:
-            if p_total['id_personal'] == p_contratado.id_personal:
+            # p_contratado es OBJETO (usa punto .id_personal)
+            # p_total es DICCIONARIO (usa corchetes ['id_personal'])
+            if p_total.get('id_personal') == p_contratado.id_personal:
+                if 'fechas_ocupadas' not in p_total:
+                    p_total['fechas_ocupadas'] = []
                 p_total['fechas_ocupadas'].append(bloque)
-    # 4. DESCUENTO DE INVENTARIO
+
+    # 3. DESCUENTO DE INVENTARIO
     for item in cotizacion['items_pedidos']:
         for inv in lista_inventario:
-            # Buscamos por ID que es más seguro que el nombre
             if inv['id_item'] == item.id_item_reserva:
                 inv['cantidad'] -= item.cantidad_requerida
 
@@ -278,24 +275,26 @@ def limpiar_pantalla():
     else:
         os.system('clear')
 
-def guardar_reserva_json(nueva_boda):
+def guardar_reserva_json(cotizacion):
     # 1. Decimos dónde se va a guardar (en la carpeta data)
     nombre_archivo = 'data/historial_reservas.json'
 
     # 2. Leemos lo que ya hay en el archivo.
     # Si no existe, historial será una lista vacía []
     historial = ensure_file_exist(nombre_archivo, [])
+    boda_para_guardar = cotizacion.copy() # Copiamos para no dañar la original
+# Convertimos los objetos de personal a diccionarios
+    boda_para_guardar['personal_contratado'] = [
+        vars(p) if hasattr(p, '__dict__') else p for p in cotizacion['personal_contratado']
+    ]
+    # Convertimos los objetos de servicios a diccionarios
+    boda_para_guardar['items_pedidos'] = [
+        vars(s) if hasattr(s, '__dict__') else s for s in cotizacion['items_pedidos']
+    ]
 
-    # 3. Convertimos la boda en un "diccionario" (formato JSON)
-    # Como 'nueva_boda' es un objeto de clase, necesitamos vars()
-    boda_diccionario = vars(nueva_boda)
-
-    # 4. Agregamos la nueva boda a la lista que ya teníamos
-    historial.append(boda_diccionario)
-
-    # 5. Escribimos la lista completa de nuevo en el archivo
-    with open(nombre_archivo, 'w', encoding='utf-8') as f:
-        json.dump(historial, f, indent=4, ensure_ascii=False)
+    historial.append(boda_para_guardar)
+    write_json(nombre_archivo, historial)
+    print("✅ Boda guardada en el historial de reservas.")
 
     print("✅ La boda se guardó correctamente en el historial.")
 
@@ -309,10 +308,15 @@ def liberar_recursos(cotizacion, lista_lugares, lista_personal, lista_inventario
 
     # 2. Liberar personal
     for p_contratado in cotizacion['personal_contratado']:
-        p_maestro = buscar_elemento_id(p_contratado.id_personal, lista_personal, 'id_personal')
+        # Obtenemos el ID de forma segura sea objeto o dicc
+        id_a_liberar = getattr(p_contratado, 'id_personal', None) or p_contratado.get('id_personal')
+        
+        p_maestro = buscar_elemento_id(id_a_liberar, lista_personal, 'id_personal')
+        
         if p_maestro:
-            p_maestro['fechas_ocupadas'] = [f for f in p_maestro['fechas_ocupadas'] if f['fecha'] != fecha_boda]
-
+            # Filtramos para quitar el bloque horario de esa fecha
+            p_maestro['fechas_ocupadas'] = [f for f in p_maestro.get('fechas_ocupadas', []) 
+                                            if f.get('fecha') != fecha_boda]
     # 3. Devolver Inventario
     for servicio in cotizacion['items_pedidos']:
         for item_inv in lista_inventario:
@@ -333,7 +337,7 @@ def generar_ticket(cliente, lugar, personal, servicios, subtotal, comision, tota
 
         # Uso de 'lugar'
         f.write(f"LUGAR SELECCIONADO: {lugar['nombre']}\n")
-        f.write(f"COSTO LUGAR: ${lugar['costo']}\n\n")
+        f.write(f"COSTO LUGAR: ${lugar['precio']}\n\n")
 
         # Uso de 'personal'
         f.write("PERSONAL CONTRATADO:\n")
@@ -365,51 +369,67 @@ def can_select_lugar(presupuesto_cliente, precio_lugar):
         return False
 
 
-def validar_restricciones_inteligentes(personal_contratado, servicios_elegidos, lugar_seleccionado):
+def validar_restricciones_inteligentes(personal_contratado,
+                                       servicios_elegidos,
+                                       lugar_seleccionado,
+                                       num_invitados):
     """
     Analiza la combinación de recursos para evitar conflictos de negocio.
+    Verifica co-requisitos, exclusiones, seguridad, mobiliario y tecnología.
     """
-    # 1. Normalizamos a minúsculas para que la búsqueda no falle por una mayúscula
+    # 1. Preparación y normalización de datos
     oficios_p = [p.oficio.lower() for p in personal_contratado]
     nombres_s = [s.nombre.lower() for s in servicios_elegidos]
     nombre_lugar = lugar_seleccionado['nombre'].lower()
 
-    # --- REGLA 1: CO-REQUISITOS (Necesitas A para tener B) ---
-
-    # Si eligen 'Barra Libre de Coctelería' (catering.json)
+    # --- REGLA 1: CO-REQUISITOS (Dependencias de Personal) ---
+    # La Barra Libre requiere un Barman
     if any("coctelería" in s for s in nombres_s):
-        # Debe haber alguien con oficio 'Sommelier / Barman' (personal.json)
         if not any("barman" in o for o in oficios_p):
             return False, "La 'Barra Libre' requiere contratar al 'Sommelier / Barman' en el paso de Personal."
 
-    # Si eligen 'Solo de Violín Eléctrico' (musica.json)
+    # El Violín requiere un Maestro de Ceremonias por protocolo
     if any("violín" in s for s in nombres_s):
-        # Exigimos al 'Maestro de Ceremonias' (personal.json)
         if "maestro de ceremonias" not in oficios_p:
-            return False, "El 'Solo de Violín' requiere un 'Maestro de Ceremonias' para el protocolo."
+            return False, "El 'Solo de Violín' requiere un 'Maestro de Ceremonias' para coordinar el protocolo."
 
-
-    # --- REGLA 2: EXCLUSIÓN MUTUA (No puedes mezclar A con B) ---
-
-    # Si el lugar es el 'Palacio de Cristal'
-    if "cristal" in nombre_lugar:
-        # No permitimos 'Mariachi Real de Oro' (por el eco y volumen en cristal)
-        if any("mariachi" in s for s in nombres_s):
-            return False, "El Palacio de Cristal no admite Mariachis por restricciones de acústica."
-
-    # Si contratan al 'DJ Carlos'
-    if "música" in oficios_p and any("dj" in p.nombre.lower() for p in personal_contratado):
-        # No pueden contratar la 'Banda de Rock' (conflicto de equipos de sonido)
-        if any("rock" in s for s in nombres_s):
-            return False, "No se puede tener DJ y Banda de Rock en el mismo evento (conflicto de audio)."
-    # En tu personal tienes "Maquillaje y Peinado". 
-    # Si alguien elige un "Banquete Gala" (Catering), el protocolo exige verse impecable.
+    # El Banquete de Gala requiere Maquillaje y Peinado
     if any("gala" in s for s in nombres_s) and "maquillaje y peinado" not in oficios_p:
-        return False, "Los eventos de 'Gala' requieren contratar el servicio de 'Maquillaje y Peinado' para los anfitriones."
+        return False, "Los eventos de 'Gala' requieren el servicio de 'Maquillaje y Peinado' para los anfitriones."
 
-    # 2. REGLA DE SEGURIDAD EN TERRAZA (Lugar + Personal)
-    # Tu 'Terraza del Sol' tiene una piscina. Por seguridad, no debería alquilarse sin vigilancia.
-    if "terraza" in nombre_lugar and "seguridad" not in str(oficios_p):
-        return False, "La 'Terraza del Sol' tiene piscina y requiere contratar 'Seguridad y Valet Parking' obligatorio."
-    # Si todo pasó las pruebas:
+    # --- REGLA 2: EXCLUSIONES (Conflictos de Recursos) ---
+    # El Palacio de Cristal no permite Mariachis (Acústica)
+    if "cristal" in nombre_lugar and any("mariachi" in s for s in nombres_s):
+        return False, "El Palacio de Cristal no admite Mariachis debido a restricciones de acústica y eco."
+
+    # No se permite DJ y Banda de Rock simultáneamente
+    tiene_dj = any("dj" in o for o in oficios_p)
+    tiene_rock = any("rock" in s for s in nombres_s)
+    if tiene_dj and tiene_rock:
+        return False, "Conflicto de audio: No se puede contratar DJ y Banda de Rock para el mismo espacio."
+
+    # --- REGLA 3: SEGURIDAD (Restricciones del Lugar) ---
+    # La Terraza del Sol tiene piscina y exige seguridad
+    tiene_seguridad = any("seguridad" in o for o in oficios_p)
+    if "terraza" in nombre_lugar and not tiene_seguridad:
+        return False, "La 'Terraza del Sol' cuenta con piscina y requiere 'Seguridad y Valet Parking' obligatorio."
+
+    # --- REGLA 4: CONSISTENCIA DE MOBILIARIO (Sillas vs Invitados) ---
+    # Sumamos todas las sillas contratadas (por si eligió varios tipos)
+    cant_sillas = sum(s.cantidad_requerida for s in servicios_elegidos if "silla" in s.nombre.lower())
+
+    # Validamos que haya al menos un asiento para el 80% de los invitados
+    if cant_sillas > 0 and cant_sillas < (num_invitados * 0.8):
+        return False, f"Mobiliario insuficiente: Tiene {cant_sillas} sillas para {num_invitados} invitados (Mín. 80%)."
+
+    # --- REGLA 5: INFRAESTRUCTURA TECNOLÓGICA ---
+    # Si hay música, debe haber equipo de sonido
+    servicios_musicales = ["dj", "rock", "banda", "mariachi", "música en vivo"]
+    necesita_audio = any(m in s for s in nombres_s for m in servicios_musicales)
+    tiene_equipo_sonido = any("sonido" in s or "parlante" in s for s in nombres_s)
+
+    if necesita_audio and not tiene_equipo_sonido:
+        return False, "Música detectada: Es obligatorio incluir 'Equipo de Sonido Profesional' en Tecnología."
+
+    # Si llega aquí, todo está en orden
     return True, ""
