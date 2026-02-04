@@ -157,35 +157,59 @@ def ejecutar_registro_boda():
         print("\nIntente con otra fecha o lugar.")
         input("Presione Enter para salir...")
         return
+    #---SELECCION DEL LUGAR---
+    # 1. CREAR UNA LISTA VACÍA PARA LOS LUGARES QUE CUMPLEN
+    lugares_aptos = []
 
+    # 2. RECORRER LA LISTA ORIGINAL Y FILTRAR
+    for l in lista_lugares:
+        # Si la capacidad del lugar es suficiente para los invitados...
+        if l['capacidad'] >= cliente_actual.invitados:
+            # ... lo agregamos a nuestra lista de opciones válidas
+            lugares_aptos.append(l)
+
+    # 3. VALIDAR SI QUEDÓ ALGÚN LUGAR
+    if not lugares_aptos:
+        print("\n" + "!"*45)
+        print(f"❌ ERROR: Ningún salón tiene capacidad para {cliente_actual.invitados} pers.")
+        print("!"*45)
+        input("Presione Enter para volver...")
+        return # Detenemos la función porque no hay opciones
+    # 3. MOSTRAR LA TABLA
     print("\n================================")
     print("      SALONES DISPONIBLES       ")
     print("================================")
-    for l in lugares_libres:
-        # Mostramos los datos clave para que el cliente decida
-        print(
-        f"ID: {l['id_lugar']} | {l['nombre'].ljust(20)} | "
-        f"Capacidad: {l['capacidad']} pers. | Precio: ${l['precio']:>6}"
-    )
     print("================================\n")
-    lugar_elegido = None  # Empezamos sin nada
+    for l in lugares_aptos: # <--- Cambiado a lugares_aptos
+        print(
+            f"ID: {str(l['id_lugar']).ljust(4)} | {l['nombre'].ljust(20)} | "
+            f"Cap: {str(l['capacidad']).rjust(3)} pers. | Precio: ${l['precio']:>6}"
+        )
+    print("============================================\n")
 
-    while lugar_elegido is None:  # Mientras no tengamos un lugar válido...
+    lugar_elegido = None
+    while lugar_elegido is None:
         try:
-            id_lug = int(input("\nSeleccione ID del lugar (o '0' para cancelar): "))
+            id_lug = int(input("Seleccione ID del lugar (o '0' para cancelar): "))
 
             if id_lug == 0:
                 print("Operación cancelada.")
-                return # Salimos de la función si se arrepienten
+                return
 
-            lugar_seleccionado = next((l for l in lugares_libres if l['id_lugar'] == id_lug), None)
+            # Usamos tu función de búsqueda
+            lugar_seleccionado = fg.buscar_elemento_id(id_lug, lugares_aptos, 'id_lugar')
 
             if lugar_seleccionado:
-            # Usamos tu función can_select_lugar
                 if fg.can_select_lugar(cliente_actual.presupuesto, lugar_seleccionado['precio']):
-                    lugar_elegido = lugar_seleccionado # <--- ESTO ROMPE EL BUCLE
+                    # --- ÉXITO ---
+                    lugar_elegido = lugar_seleccionado
+
+                    # RESTAMOS EL COSTO DEL PRESUPUESTO DEL CLIENTE
+                    cliente_actual.presupuesto -= lugar_elegido['precio']
+
                     print(f"✅ Sede confirmada: {lugar_elegido['nombre']}")
-                    input("Presione Enter para continuar a la contratación de personal...")
+                    print(f"💰 Presupuesto restante: ${cliente_actual.presupuesto}")
+                    input("\nPresione Enter para continuar a la contratación de personal...")
                 else:
                     print(
                         f"❌ ¡Presupuesto insuficiente! El salón "
@@ -194,7 +218,7 @@ def ejecutar_registro_boda():
                     )
                     print("Por favor, elija un lugar acorde a su presupuesto.")
             else:
-                print("❌ ID no encontrado en la lista de salones disponibles.")
+                print("❌ ID no encontrado o el lugar no es apto para sus invitados.")
 
         except ValueError:
             print("❌ Por favor, introduce un número válido.")
@@ -208,8 +232,15 @@ def ejecutar_registro_boda():
         fg.limpiar_pantalla()
         # El presupuesto se actualiza aquí arriba cada vez que el bucle reinicia
         print(f"--- PASO 3: CONTRATACIÓN DE PERSONAL (Presupuesto: ${cliente_actual.presupuesto}) ---")
-        
-        tipo = input("\n¿Qué oficio busca? (Fotografia, Seguridad, Estetica, Planificador, Decoracion o Barman / '0' para continuar): ").lower().strip()
+
+        # Def mensaje en varias líneas para que sea legible
+        mensaje_prompt = (
+            "\n¿Qué oficio busca? (Fotografia, Seguridad, Estetica, "
+            "Planificador, Decoracion o Barman / '0' para continuar): "
+        )
+
+        # Ahora input queda corto y limpio
+        tipo = input(mensaje_prompt).lower().strip()
 
         if tipo == '0':
             break
@@ -228,17 +259,17 @@ def ejecutar_registro_boda():
 
         try:
             id_p = int(input(f"ID del {tipo} a contratar (0 para volver): "))
-            if id_p == 0: 
+            if id_p == 0:
                 continue
 
-            dict_p = fg.contratar_personal(lista_personal, id_p) 
-            
+            dict_p = fg.contratar_personal(lista_personal, id_p)
+
             if dict_p:
                 # 1. Variables y validación de duplicados
                 oficio_p = dict_p['oficio'].lower()
                 sueldo_p = dict_p['sueldo']
                 ya_contratado = any(p.id_personal == dict_p['id_personal'] for p in personal_contratado)
-                
+
                 if ya_contratado:
                     print(f"⚠️ {dict_p['nombre']} ya ha sido añadido.")
                 elif sueldo_p > cliente_actual.presupuesto:
@@ -247,12 +278,10 @@ def ejecutar_registro_boda():
                     # 2. Contratación y Resta de presupuesto
                     cliente_actual.presupuesto -= sueldo_p # ESTO actualiza el número de arriba
                     personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], sueldo_p))
-                    
-                    # MENSAJE QUE DICES QUE NO VES:
+
+
                     print(f"\n✅ CONFIRMADO: {dict_p['nombre']} como {oficio_p}.")
                     print(f"💰 Nuevo presupuesto restante: ${cliente_actual.presupuesto}")
-
-                # PAUSA 2: Esta es la más importante. 
                 # Está fuera de los IFs de éxito/error, así que siempre se detiene.
                 input("\nPresione Enter para continuar...") 
 
@@ -260,7 +289,7 @@ def ejecutar_registro_boda():
                 print("❌ ID no encontrado.")
                 input("Presione Enter...") # PAUSA 3
 
-        except ValueError: 
+        except ValueError:
             print("⚠️ Error: Use solo números para el ID.")
             input("Presione Enter...") # PAUSA 4
 
