@@ -1,8 +1,9 @@
 """Este programa contiene las funciones generales del sistema"""
 from datetime import datetime,timedelta
-from modulos import Personal,ItemReserva
 import json
 import os
+import modulos
+
 
 def write_json(ruta,data):
     """
@@ -387,6 +388,44 @@ def imprimir_tabla_personal(lista_disponibles):
 
         print(f"{idx:<5} | {nom:<22} | {exp:<18} | ${sue:<10}")
     print("-" * 65)
+
+def ver_historial():
+    """
+    Carga y muestra en pantalla todas las bodas registradas en el historial JSON.
+    
+    Acciones:
+    - Recupera la lista de bodas desde 'historial_reservas.json'.
+    - Itera sobre los registros para mostrar detalles clave como: 
+      nombre del cliente, lugar seleccionado y monto total pagado.
+    - Maneja casos donde el archivo no existe o el historial está vacío.
+    """
+
+    print("==========================================")
+    print("       HISTORIAL DE BODAS REGISTRADAS     ")
+    print("==========================================\n")
+
+    # Usamos tu función de seguridad para cargar el archivo
+    reservas = ensure_file_exist('data/historial_reservas.json', [])
+    ganancia_total_empresa = 0
+    if not reservas:
+        print("⚠️ No se encontraron bodas registradas en el historial.")
+    else:
+        # Recorremos cada reserva guardada
+        for i, boda in enumerate(reservas, 1):
+            # Accedemos a los datos navegando por las llaves del diccionario
+            # Recuerda que 'cliente' ahora es un diccionario porque usaste to_dict()
+            nombre_cliente = boda.get('cliente', 'Cliente Desconocido')
+            total = boda['total_final']
+            comision = boda.get('comision', 0) # <--- Extraemos la comisión
+            ganancia_total_empresa += comision # <--- Sumamos
+ 
+            print(f"{i}. CLIENTE: {nombre_cliente}")
+            print(f"   TOTAL: ${total:.2f} | COMISIÓN EMPRESA: ${comision:.2f}")
+            print("-" * 40)
+            # Opcional: Mostrar cuántos servicios contrató
+            cant_servicios = len(boda.get('servicios', []))
+            print(f"   SERVICIOS: {cant_servicios} contratados")
+            print("-" * 40)
 
 def val_restricc(personal_contratado, servicios_elegidos, lugar_seleccionado, num_invitados):
     # 1. NORMALIZACIÓN (Fundamental para evitar errores de tildes o mayúsculas)

@@ -5,5 +5,19 @@
         "email": "nath@gmail.com",
         "invitados": 120,
         "presupuesto": 7000.0
+    },
+    {
+        "id_cliente": 3000,
+        "nombre": "miley heredia",
+        "email": "mileyh@gmail.com",
+        "invitados": 200,
+        "presupuesto": 8000.0
+    },
+    {
+        "id_cliente": 1000,
+        "nombre": "--------",
+        "email": "------@gmail.com",
+        "invitados": 5,
+        "presupuesto": 1588.0
     }
 ]

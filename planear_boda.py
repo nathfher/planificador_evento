@@ -44,12 +44,24 @@ def ejecutar_registro_boda():
     # 2. VALIDAR NOMBRE
     while True:
         name_client = input("Ingrese nombre completo: ").strip()
-        # Verificamos longitud y que no tenga números
-        if len(name_client) < 8 or any(char.isdigit() for char in name_client):
-            print("⚠️ Nombre inválido. Debe tener mín. 8 letras y no contener números.")
+        
+        # 1. Verificamos que no esté vacío después del strip
+        if not name_client:
+            print("⚠️ El nombre no puede estar vacío.")
             continue
-        break
 
+        # 2. Reemplazamos espacios para validar solo letras
+        # Esto permite nombres como "Raquel García" pero bloquea "Raquel_García"
+        solo_letras = name_client.replace(" ", "")
+
+        # 3. Validaciones combinadas:
+        if len(name_client) < 8:
+            print("⚠️ Nombre demasiado corto. Debe tener mín. 8 caracteres.")
+        elif not solo_letras.isalpha():
+            print("⚠️ Nombre inválido. No use números, guiones ni símbolos (solo letras).")
+        else:
+            # Si pasa todo, salimos
+            break
     # 3. VALIDAR CORREO
     while True:
         correo_temp = input("Ingrese correo (@gmail.com): ").lower().strip()
@@ -123,27 +135,40 @@ def ejecutar_registro_boda():
                 print("❌ Hora inexistente. Use el rango 00:00 - 23:59.")
         else:
             print("⚠️ Formato incorrecto. Use estrictamente HH:MM (5 caracteres y un solo ':').")
-            print("   Ejemplo: Para las 3 de la tarde, escriba 15:00")
+            print("Ejemplo: Para las 3 de la tarde, escriba 15:00")
 
     while True:
         h_fin = input("Hora de finalización (Formato HH:MM, ej. 21:30): ").strip()
 
+        # 1. Validación de formato (5 caracteres, ":" en medio, solo un ":")
         if len(h_fin) == 5 and h_fin[2] == ":" and h_fin.count(":") == 1:
             try:
-            # Validamos que sea hora real
-                t_ini = datetime.strptime(h_ini, "%H:%M")
+                # Convertimos a tiempo (t_ini ya debe existir del paso anterior)
                 t_fin = datetime.strptime(h_fin, "%H:%M")
+                t_ini = datetime.strptime(h_ini, "%H:%M") # Aseguramos tener ambos para comparar
 
-            # Validamos que no termine antes de empezar
-                if t_fin > t_ini:
-                    break
-                else:
+                diferencia = t_fin - t_ini
+                segundos_minimos = 2 * 3600 # 2 horas
+
+                # 2. Validaciones de negocio
+                if t_fin <= t_ini:
                     print("❌ La hora de fin debe ser posterior a la de inicio.")
+                elif diferencia.total_seconds() < segundos_minimos:
+                    print(f"❌ Duración insuficiente. Mínimo 2 horas (Su evento: {diferencia.total_seconds()/60:.0f} min).")
+                else:
+                    # TODO CORRECTO: Salimos del bucle
+                    break
             except ValueError:
-                print("❌ Hora inexistente.")
-            # CAMBIO AQUÍ: Usamos input() en lugar de print() para forzar la pausa
-            input("\nPresione Enter para continuar a la selección de lugar...")
+                print("❌ Hora inexistente (use rango 00:00 - 23:59).")
+        else:
+            print("⚠️ Formato incorrecto. Use HH:MM (ej. 20:00).")
+        
+        # Este input va DENTRO del while pero FUERA de los if de éxito
+        input("Presione Enter para reintentar...")
 
+    # Este print va FUERA del while, cuando ya todo es válido
+    print(f"✅ Duración confirmada: {diferencia.total_seconds()/3600:.1f} horas.")
+    input("\nPresione Enter para continuar a la selección de lugar...")
     # --- PASO 3: SELECCIÓN DE LUGAR ---
     fg.limpiar_pantalla()
 
