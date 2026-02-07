@@ -388,6 +388,7 @@ def val_restricc(personal_contratado, servicios_elegidos, lugar_seleccionado, nu
 
     nombre_lug = lugar_seleccionado['nombre'].lower()
 
+    # 1. Validaciones de Personal vs Servicios
     if any("cocteleria" in s or "barra libre" in s for s in nombres_s):
         if not any("barman" in o or "sommelier" in o for o in oficios_p):
             return False, "La 'Barra Libre' requiere contratar al 'Sommelier / Barman'."
@@ -396,26 +397,31 @@ def val_restricc(personal_contratado, servicios_elegidos, lugar_seleccionado, nu
         if not any("maestro de ceremonias" in o for o in oficios_p):
             return False, "El 'Solo de Violín' requiere un 'Maestro de Ceremonias'."
 
-
+    # 2. Restricciones por Lugar
     if "cristal" in nombre_lug and any("mariachi" in s for s in nombres_s):
         return False, "El Palacio de Cristal no admite Mariachis por restricciones de eco."
 
+    if "terraza" in nombre_lug and not any("seguridad" in o for o in oficios_p):
+        return False, "La 'Terraza del Sol' requiere 'Seguridad' obligatorio por la piscina."
 
+    # 3. Conflictos de Audio
     tiene_dj = any("dj" in o for o in oficios_p)
     tiene_rock = any("rock" in s for s in nombres_s)
     if tiene_dj and tiene_rock:
         return False, "Conflicto de audio: No se puede contratar DJ y Banda de Rock simultáneamente."
 
-
-    if "terraza" in nombre_lug and not any("seguridad" in o for o in oficios_p):
-        return False, "La 'Terraza del Sol' requiere 'Seguridad' obligatorio por la piscina."
-
-
+    # 4. Mobiliario: Sillas (80%)
     cant_sillas = sum(s.cantidad_requerida for s in servicios_elegidos if "silla" in s.nombre.lower())
     if num_invitados > 0 and cant_sillas < (num_invitados * 0.8):
         return False, f"Mobiliario insuficiente: Tiene {cant_sillas} sillas para {num_invitados} invitados (Mín. 80%)."
 
+    # 5. NUEVA RESTRICCIÓN: Mesas (1 por cada 10 invitados)
+    cant_mesas = sum(s.cantidad_requerida for s in servicios_elegidos if "mesa" in s.nombre.lower())
+    mesas_necesarias = int(num_invitados / 10)
+    if num_invitados > 0 and cant_mesas < mesas_necesarias:
+        return False, f"Mobiliario insuficiente: Tiene {cant_mesas} mesas para {num_invitados} invitados (Mín. 1 mesa/10 pers)."
 
+    # 6. Requerimiento de Audio Profesional
     necesita_audio = any(m in s for s in nombres_s for m in ["dj", "rock", "banda", "mariachi"])
     tiene_equipo = any("sonido" in s or "parlante" in s for s in nombres_s)
     if necesita_audio and not tiene_equipo:
