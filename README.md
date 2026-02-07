@@ -1,7 +1,8 @@
 # 💍 Raquel & Alba Planner - Sistema de Gestión Nupcial
 
 Sistema integral de planificación de bodas inspirado en la serie *La que se avecina*. Este software actúa como un organizador de eventos con "cabeza fría", gestionando recursos, personal y presupuestos para evitar desastres logísticos.
-
+> 📖 **DOCUMENTACIÓN IMPORTANTE:**
+> Para conocer a fondo la lógica de programación, las reglas de negocio y los desafíos técnicos superados, por favor lea el **[Informe Técnico detallado aquí](./Informe_Tecnico.md)**.
 ## 1. Requisitos del Sistema
 Para ejecutar este programa, su computadora debe cumplir con lo siguiente:
 * **Lenguaje:** Python 3.8 o superior.
