@@ -30,12 +30,12 @@ def ver_historial():
         print("⚠️ No se encontraron bodas registradas en el historial.")
     else:
         for i, boda in enumerate(reservas, 1):
-            nombre_cliente = boda['cliente']['nombre']
+            name_client = boda.get('cliente', 'Cliente Desconocido')
             total = boda['total_final']
             comision = boda.get('comision', 0)
             ganancia_total_empresa += comision
 
-            print(f"{i}. CLIENTE: {nombre_cliente}")
+            print(f"{i}. CLIENTE: {name_client}")
             print(f"   TOTAL: ${total:.2f} | COMISIÓN EMPRESA: ${comision:.2f}")
             print("-" * 40)
             cant_servicios = len(boda.get('servicios', []))

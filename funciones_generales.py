@@ -1,5 +1,6 @@
 """Este programa contiene las funciones generales del sistema"""
 from datetime import datetime,timedelta
+from modulos import Personal,ItemReserva
 import json
 import os
 
@@ -10,7 +11,7 @@ def write_json(ruta,data):
     con un formato ordenado (indentación de 4 espacios).
     """
     with open(ruta,'w',encoding='utf-8') as f:
-        json.dump(data,f,indent=4)
+        json.dump(data,f,indent=4,ensure_ascii=False)
 
 def ensure_file_exist(ruta,data_inicial):
     """
@@ -343,7 +344,7 @@ def generar_ticket(cliente, lugar, personal, servicios, subtotal, comision, tota
         f.write("PERSONAL CONTRATADO:\n")
         for p in personal:
             # Aquí 'p' es un objeto de la clase Personal
-            f.write(f"- {p.nombre} ({p.oficio}): ${p.sueldo}\n")
+            f.write(f"- {p.nombre} ({p.oficio} - Nivel: {p.experiencia}): ${p.sueldo}\n")
 
         # Uso de 'servicios'
         f.write("\nSERVICIOS ADICIONALES:\n")
@@ -368,68 +369,66 @@ def can_select_lugar(presupuesto_cliente, precio_lugar):
     else:
         return False
 
+def imprimir_tabla_personal(lista_disponibles):
+    """Dibuja la tabla con la nueva columna de EXPERIENCIA"""
+    if not lista_disponibles:
+        return # Si no hay nadie, no dibuja nada
 
-def validar_restricciones_inteligentes(personal_contratado,
-                                       servicios_elegidos,
-                                       lugar_seleccionado,
-                                       num_invitados):
-    """
-    Analiza la combinación de recursos para evitar conflictos de negocio.
-    Verifica co-requisitos, exclusiones, seguridad, mobiliario y tecnología.
-    """
-    # 1. Preparación y normalización de datos
-    oficios_p = [p.oficio.lower() for p in personal_contratado]
-    nombres_s = [s.nombre.lower() for s in servicios_elegidos]
-    nombre_lugar = lugar_seleccionado['nombre'].lower()
+    # Ajustamos el ancho para que se vea profesional
+    print(f"\n{'ID':<5} | {'NOMBRE':<22} | {'EXPERIENCIA':<18} | {'SUELDO'}")
+    print("-" * 65)
 
-    # --- REGLA 1: CO-REQUISITOS (Dependencias de Personal) ---
-    # La Barra Libre requiere un Barman
-    if any("coctelería" in s for s in nombres_s):
-        if not any("barman" in o for o in oficios_p):
-            return False, "La 'Barra Libre' requiere contratar al 'Sommelier / Barman' en el paso de Personal."
+    for p in lista_disponibles:
+        # Extraemos con .get para que si no existe 'experiencia' no explote
+        idx = p.get('id_personal', '??')
+        nom = p.get('nombre', 'N/A')
+        exp = p.get('experiencia', 'Estandar') # Aquí saldrá "Alta" o "Media"
+        sue = p.get('sueldo', 0)
 
-    # El Violín requiere un Maestro de Ceremonias por protocolo
-    if any("violín" in s for s in nombres_s):
-        if "maestro de ceremonias" not in oficios_p:
-            return False, "El 'Solo de Violín' requiere un 'Maestro de Ceremonias' para coordinar el protocolo."
+        print(f"{idx:<5} | {nom:<22} | {exp:<18} | ${sue:<10}")
+    print("-" * 65)
 
-    # El Banquete de Gala requiere Maquillaje y Peinado
-    if any("gala" in s for s in nombres_s) and "maquillaje y peinado" not in oficios_p:
-        return False, "Los eventos de 'Gala' requieren el servicio de 'Maquillaje y Peinado' para los anfitriones."
+def val_restricc(personal_contratado, servicios_elegidos, lugar_seleccionado, num_invitados):
+    # 1. NORMALIZACIÓN (Fundamental para evitar errores de tildes o mayúsculas)
+    oficios_p = [p.oficio.lower().strip() for p in personal_contratado]
+    nombres_s = [s.nombre.lower().strip() for s in servicios_elegidos]
+    # CORRECCIÓN: Usamos una variable distinta para no sobreescribir el diccionario original
+    nombre_lug = lugar_seleccionado['nombre'].lower()
 
-    # --- REGLA 2: EXCLUSIONES (Conflictos de Recursos) ---
-    # El Palacio de Cristal no permite Mariachis (Acústica)
-    if "cristal" in nombre_lugar and any("mariachi" in s for s in nombres_s):
-        return False, "El Palacio de Cristal no admite Mariachis debido a restricciones de acústica y eco."
+    # --- REGLA 1: CO-REQUISITOS (Dependencias) ---
+    if any("cocteleria" in s or "barra libre" in s for s in nombres_s):
+        if not any("barman" in o or "sommelier" in o for o in oficios_p):
+            return False, "La 'Barra Libre' requiere contratar al 'Sommelier / Barman'."
 
-    # No se permite DJ y Banda de Rock simultáneamente
+    if any("violin" in s for s in nombres_s):
+        if not any("maestro de ceremonias" in o for o in oficios_p):
+            return False, "El 'Solo de Violín' requiere un 'Maestro de Ceremonias'."
+
+    # --- REGLA 2: EXCLUSIONES (Lo que NO puede ir junto) ---
+    # Conflicto de Acústica en el Palacio de Cristal
+    if "cristal" in nombre_lug and any("mariachi" in s for s in nombres_s):
+        return False, "El Palacio de Cristal no admite Mariachis por restricciones de eco."
+
+    # Conflicto de Audio: DJ vs Banda de Rock
     tiene_dj = any("dj" in o for o in oficios_p)
     tiene_rock = any("rock" in s for s in nombres_s)
     if tiene_dj and tiene_rock:
-        return False, "Conflicto de audio: No se puede contratar DJ y Banda de Rock para el mismo espacio."
+        return False, "Conflicto de audio: No se puede contratar DJ y Banda de Rock simultáneamente."
 
-    # --- REGLA 3: SEGURIDAD (Restricciones del Lugar) ---
-    # La Terraza del Sol tiene piscina y exige seguridad
-    tiene_seguridad = any("seguridad" in o for o in oficios_p)
-    if "terraza" in nombre_lugar and not tiene_seguridad:
-        return False, "La 'Terraza del Sol' cuenta con piscina y requiere 'Seguridad y Valet Parking' obligatorio."
+    # --- REGLA 3: SEGURIDAD ---
+    # La Terraza requiere seguridad por la piscina
+    if "terraza" in nombre_lug and not any("seguridad" in o for o in oficios_p):
+        return False, "La 'Terraza del Sol' requiere 'Seguridad' obligatorio por la piscina."
 
-    # --- REGLA 4: CONSISTENCIA DE MOBILIARIO (Sillas vs Invitados) ---
-    # Sumamos todas las sillas contratadas (por si eligió varios tipos)
+    # --- REGLA 4: MOBILIARIO ---
     cant_sillas = sum(s.cantidad_requerida for s in servicios_elegidos if "silla" in s.nombre.lower())
-
-    # Validamos que haya al menos un asiento para el 80% de los invitados
-    if cant_sillas > 0 and cant_sillas < (num_invitados * 0.8):
+    if num_invitados > 0 and cant_sillas < (num_invitados * 0.8):
         return False, f"Mobiliario insuficiente: Tiene {cant_sillas} sillas para {num_invitados} invitados (Mín. 80%)."
 
-    # --- REGLA 5: INFRAESTRUCTURA TECNOLÓGICA ---
-    # Si hay música, debe haber equipo de sonido
-    servicios_musicales = ["dj", "rock", "banda", "mariachi", "música en vivo"]
-    necesita_audio = any(m in s for s in nombres_s for m in servicios_musicales)
-    tiene_equipo_sonido = any("sonido" in s or "parlante" in s for s in nombres_s)
+    # --- REGLA 5: INFRAESTRUCTURA (Tecnología) ---
+    necesita_audio = any(m in s for s in nombres_s for m in ["dj", "rock", "banda", "mariachi"])
+    tiene_equipo = any("sonido" in s or "parlante" in s for s in nombres_s)
+    if necesita_audio and not tiene_equipo:
+        return False, "Música detectada: Es obligatorio incluir 'Equipo de Sonido Profesional'."
 
-    if necesita_audio and not tiene_equipo_sonido:
-        return False, "Música detectada: Es obligatorio incluir 'Equipo de Sonido Profesional' en Tecnología."
-
-    # Si llega aquí, todo está en orden
     return True, ""

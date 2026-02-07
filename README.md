@@ -66,3 +66,9 @@ A diferencia de los presupuestos "a ojo" que podrían hacerse en Montepinar, est
 
 ## 7. Conclusión
 **Raquel & Alba Planner** es el programa que habría salvado aquel evento de la serie. Mientras Raquel sufría por ver a su amor platónico casarse con su mejor amiga, este software se habría encargado de que la comida llegara a tiempo y los músicos no chocaran. Se consiguió crear una aplicación donde manda el código y no los sentimientos, asegurando que cada boda sea un éxito rotundo.
+
+"Se integró una diferenciación de perfiles dentro de la categoría de personal. Se estableció que el costo de los servicios (como el de las planificadoras) no fuera arbitrario, sino que estuviera vinculado a un nivel de experiencia (Alta/Media). Esta implementación permite al sistema ofrecer opciones que se ajusten a la capacidad económica del cliente sin sacrificar la coherencia del modelo de negocio."
+
+Estandarización de servicios por niveles de experiencia "Se determinó la necesidad de categorizar al personal según su trayectoria profesional para validar la variabilidad de costos dentro de una misma categoría de oficio.
+
+Justificación de la variabilidad de costos: "Se detectó que el sistema presentaba disparidad de sueldos para un mismo oficio sin una razón aparente. Se resolvió mediante la incorporación de un atributo de experiencia, lo que aporta transparencia al proceso de contratación y permite una administración de recursos más realista."

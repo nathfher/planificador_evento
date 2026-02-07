@@ -2,8 +2,8 @@
     {
         "id_item": 500,
         "categoria": "catering",
-        "nombre": "Estaci\u00f3n de Quesos Artesanales y Fiambres",
-        "cantidad": 200,
+        "nombre": "Estacion de Quesos Artesanales y Fiambres",
+        "cantidad": 182,
         "precio_unidad": 35.0
     },
     {
@@ -23,8 +23,8 @@
     {
         "id_item": 503,
         "categoria": "bebida",
-        "nombre": "Vino Blanco Albari\u00f1o",
-        "cantidad": 120,
+        "nombre": "Vino Blanco Albario",
+        "cantidad": 102,
         "precio_unidad": 18.5
     },
     {
@@ -38,14 +38,14 @@
         "id_item": 505,
         "categoria": "postre",
         "nombre": "Pastel de Bodas 5 Pisos",
-        "cantidad": 5,
+        "cantidad": 3,
         "precio_unidad": 450.0
     },
     {
         "id_item": 506,
         "categoria": "mobiliario",
         "nombre": "Sillas Crossback de Madera",
-        "cantidad": 200,
+        "cantidad": 80,
         "precio_unidad": 5.5
     },
     {
@@ -59,7 +59,7 @@
         "id_item": 508,
         "categoria": "mobiliario",
         "nombre": "Calentador de Exterior de Gas",
-        "cantidad": 10,
+        "cantidad": 7,
         "precio_unidad": 45.0
     },
     {
@@ -82,5 +82,33 @@
         "nombre": "Arco de Ceremonia Minimalista",
         "cantidad": 3,
         "precio_unidad": 120.0
+    },
+    {
+        "id_item": 512,
+        "categoria": "postre",
+        "nombre": "Trío de Mousse de Chocolate Belga y Frutos Rojos",
+        "cantidad": 150,
+        "precio_unidad": 14.0
+    },
+    {
+        "id_item": 513,
+        "categoria": "postre",
+        "nombre": "Estación de Crepas Flambeadas al Momento",
+        "cantidad": 100,
+        "precio_unidad": 22.0
+    },
+    {
+        "id_item": 514,
+        "categoria": "decoracion",
+        "nombre": "Candelabros de Cristal con Orquídeas Blancas",
+        "cantidad": 20,
+        "precio_unidad": 65.0
+    },
+    {
+        "id_item": 515,
+        "categoria": "decoracion",
+        "nombre": "Centros de Mesa de Flores Estacionales",
+        "cantidad": 25,
+        "precio_unidad": 45.0
     }
 ]

@@ -5,103 +5,122 @@
         "oficio": "Fotografa",
         "categoria": "fotografia",
         "sueldo": 800,
+        "experiencia": "Alta (Senior)",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 101,
-        "nombre": "Ana Heredia",
-        "oficio": "Wedding Planner",
+        "nombre": "Alba",
+        "oficio": "Planificadora",
         "categoria": "planificador",
-        "sueldo": 1500,
+        "sueldo": 800,
+        "experiencia": "Alta (Directora)",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 102,
-        "nombre": "Roberto Juez",
-        "oficio": "Maestro de Ceremonias",
-        "categoria": "oficiante",
-        "sueldo": 400,
+        "nombre": "Raquel",
+        "oficio": "Planificadora",
+        "categoria": "planificador",
+        "sueldo": 600,
+        "experiencia": "Media (Asistente)",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 103,
-        "nombre": "Miley Style",
-        "oficio": "Maquillaje y Peinado",
-        "categoria": "estetica",
-        "sueldo": 300,
+        "nombre": "Roberto Juez",
+        "oficio": "Maestro de Ceremonias",
+        "categoria": "oficiante",
+        "sueldo": 400,
+        "experiencia": "Media",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 104,
-        "nombre": "Arte y Flores",
-        "oficio": "Decorador / Florista",
-        "categoria": "decoracion",
-        "sueldo": 1200,
+        "nombre": "Miley Style",
+        "oficio": "Maquillaje y Peinado",
+        "categoria": "estetica",
+        "sueldo": 300,
+        "experiencia": "Alta",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 105,
-        "nombre": "Seguridad Total",
-        "oficio": "Seguridad y Valet Parking",
-        "categoria": "seguridad",
-        "sueldo": 350,
+        "nombre": "Arte y Flores",
+        "oficio": "Decorador / Florista",
+        "categoria": "decoracion",
+        "sueldo": 1200,
+        "experiencia": "Alta (Diseño Exclusivo)",
         "fechas_ocupadas": []
     },
     {
         "id_personal": 106,
-        "nombre": "Julian Sommelier",
-        "oficio": "Sommelier / Barman especializado",
-        "categoria": "barman",
-        "sueldo": 450,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 107,
-        "nombre": "Miriam Ochoa",
-        "oficio": "Wedding Planner",
-        "categoria": "planificador",
-        "sueldo": 1000,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 108,
-        "nombre": "Mariam Fotografa",
-        "oficio": "Fotografa",
-        "categoria": "fotografia",
-        "sueldo": 400,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 109,
-        "nombre": "Antonio Juez",
-        "oficio": "Maestro de Ceremonias",
-        "categoria": "oficiante",
-        "sueldo": 500,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 110,
-        "nombre": "Erika Style",
-        "oficio": "Maquillaje y Peinado",
-        "categoria": "estetica",
-        "sueldo": 200,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 111,
-        "nombre": "Arte y Luces",
-        "oficio": "Luces / Iluminacion",
-        "categoria": "decoracion",
-        "sueldo": 800,
-        "fechas_ocupadas": []
-    },
-    {
-        "id_personal": 112,
         "nombre": "Seguridad Total",
         "oficio": "Seguridad y Valet Parking",
         "categoria": "seguridad",
         "sueldo": 350,
+        "experiencia": "Estándar",
         "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 107,
+        "nombre": "Julian Sommelier",
+        "oficio": "Sommelier / Barman especializado",
+        "categoria": "barman",
+        "sueldo": 450,
+        "experiencia": "Alta (Certificado)",
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 108,
+        "nombre": "Miriam Ochoa",
+        "oficio": "Wedding Planner",
+        "categoria": "planificador",
+        "sueldo": 1000,
+        "experiencia": "Alta (Especialista Luxury)",
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 109,
+        "nombre": "Mariam Fotografa",
+        "oficio": "Fotografa",
+        "categoria": "fotografia",
+        "sueldo": 400,
+        "experiencia": "Media (Junior)",
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 110,
+        "nombre": "Antonio Juez",
+        "oficio": "Maestro de Ceremonias",
+        "categoria": "oficiante",
+        "sueldo": 500,
+        "experiencia": "Alta",
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 111,
+        "nombre": "Erika Style",
+        "oficio": "Maquillaje y Peinado",
+        "categoria": "estetica",
+        "sueldo": 200,
+        "experiencia": "Media",
+        "fechas_ocupadas": []
+    },
+    {
+        "id_personal": 112,
+        "nombre": "Arte y Luces",
+        "oficio": "Luces / Iluminacion",
+        "categoria": "decoracion",
+        "sueldo": 800,
+        "experiencia": "Media",
+        "fechas_ocupadas": [
+            {
+                "fecha": "12/09/2028",
+                "inicio": "12:00",
+                "fin": "18:00"
+            }
+        ]
     },
     {
         "id_personal": 113,
@@ -109,6 +128,7 @@
         "oficio": "Sommelier / Barman especializado",
         "categoria": "barman",
         "sueldo": 450,
+        "experiencia": "Alta",
         "fechas_ocupadas": []
     },
     {
@@ -117,6 +137,7 @@
         "oficio": "DJ / Animador de Eventos",
         "categoria": "musica",
         "sueldo": 450,
+        "experiencia": "Calibre Alto (Equipamiento Pro)",
         "fechas_ocupadas": []
     },
     {
@@ -125,6 +146,7 @@
         "oficio": "Agrupacion Musical de Jazz",
         "categoria": "musica",
         "sueldo": 300,
+        "experiencia": "Calibre Medio (Trío Clásico)",
         "fechas_ocupadas": []
     },
     {
@@ -133,6 +155,7 @@
         "oficio": "Musica Regional / Mariachi",
         "categoria": "musica",
         "sueldo": 280,
+        "experiencia": "Calibre Medio",
         "fechas_ocupadas": []
     },
     {
@@ -141,6 +164,7 @@
         "oficio": "Banda de Versatilidad / Rock",
         "categoria": "musica",
         "sueldo": 460,
+        "experiencia": "Calibre Alto (Show Completo)",
         "fechas_ocupadas": []
     }
 ]

@@ -57,11 +57,12 @@ class Personal:
         sueldo (float): Pago por evento o jornada.
         fechas_ocupadas (list): Registro de fechas en las que el trabajador ya está comprometido.
     """
-    def __init__(self, id_personal, nombre, oficio, sueldo, fechas_ocupadas=None):
+    def __init__(self, id_personal, nombre, oficio, sueldo, experiencia, fechas_ocupadas=None):
         self.id_personal = id_personal
         self.nombre = nombre
         self.oficio = oficio
         self.sueldo = sueldo
+        self.experiencia = experiencia #alta, media, junior
         self.fechas_ocupadas = fechas_ocupadas if fechas_ocupadas else []
 
     def to_dict(self):

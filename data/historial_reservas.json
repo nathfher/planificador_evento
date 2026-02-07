@@ -1,1 +1,62 @@
-[]
+[
+    {
+        "id_lugar": 10,
+        "nombre_lugar": "Jard\u00edn de los Cerezos",
+        "cliente": "nathalie heredia",
+        "fecha": "12/09/2028",
+        "h_inicio": "12:00",
+        "h_fin": "18:00",
+        "personal_contratado": [
+            {
+                "id_personal": 103,
+                "nombre": "Miley Style",
+                "oficio": "Maquillaje y Peinado",
+                "sueldo": 300,
+                "fechas_ocupadas": []
+            },
+            {
+                "id_personal": 111,
+                "nombre": "Arte y Luces",
+                "oficio": "Luces / Iluminacion",
+                "sueldo": 800,
+                "fechas_ocupadas": []
+            }
+        ],
+        "items_pedidos": [
+            {
+                "id_item_reserva": 500,
+                "nombre": "Estaci\u00f3n de Quesos Artesanales y Fiambres",
+                "precio_unidad": 35.0,
+                "cantidad_requerida": 18
+            },
+            {
+                "id_item_reserva": 503,
+                "nombre": "Vino Blanco Albari\u00f1o",
+                "precio_unidad": 18.5,
+                "cantidad_requerida": 18
+            },
+            {
+                "id_item_reserva": 505,
+                "nombre": "Pastel de Bodas 5 Pisos",
+                "precio_unidad": 450.0,
+                "cantidad_requerida": 2
+            },
+            {
+                "id_item_reserva": 506,
+                "nombre": "Sillas Crossback de Madera",
+                "precio_unidad": 5.5,
+                "cantidad_requerida": 120
+            },
+            {
+                "id_item_reserva": 508,
+                "nombre": "Calentador de Exterior de Gas",
+                "precio_unidad": 45.0,
+                "cantidad_requerida": 3
+            }
+        ],
+        "subtotal": 5258.0,
+        "comision": 525.8000000000001,
+        "total_final": 5783.8,
+        "estado": "Aprobado"
+    }
+]

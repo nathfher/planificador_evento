@@ -5,9 +5,9 @@ from modulos import Cliente, Personal, ItemReserva
 def ejecutar_registro_boda():
 
     fg.limpiar_pantalla()
-    print("==========================================")
-    print("   BIENVENIDO AL SISTEMA WEDDING PLANNER  ")
-    print("==========================================\n")
+    print("=================================================")
+    print("   BIENVENIDO AL SISTEMA RAQUEL & ALBA PLANNER  ")
+    print("=================================================\n")
 
     # 1. CARGAR DATOS
     lista_lugares = fg.ensure_file_exist('data/lugares.json', [])
@@ -233,10 +233,8 @@ def ejecutar_registro_boda():
             input("Presione Enter para volver a elegir oficio...") # PAUSA 1
             continue
 
-        print(f"\n--- {tipo.upper()} DISPONIBLES ---")
-        for p in pers_libres:
-            print(f"ID: {p['id_personal']} | Nombre: {p['nombre']} | Sueldo: ${p['sueldo']}")
-        print("------------------------------")
+        print(f"\n--- {tipo.upper()} ENCONTRADOS ---")
+        fg.imprimir_tabla_personal(pers_libres)
 
         try:
             id_p = int(input(f"ID del {tipo} a contratar (0 para volver): "))
@@ -261,7 +259,8 @@ def ejecutar_registro_boda():
                 else:
                     # CAMBIO: Restamos de la temporal, NO de cliente_actual
                     presupuesto_provisional -= sueldo_p
-                    personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], sueldo_p))
+                    exp_p = dict_p.get('experiencia', 'Estándar')
+                    personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], sueldo_p,exp_p))
 
                     print(f"\n✅ CONFIRMADO: {dict_p['nombre']} como {oficio_p}.")
                     print(f"💰 Dinero restante estimado: ${presupuesto_provisional:,.2f}")
@@ -362,7 +361,7 @@ def ejecutar_registro_boda():
 
     # --- PASO 5.5: VALIDACIÓN INTELIGENTE (EL FILTRO DE SEGURIDAD) ---
     # Lo hacemos ANTES de pedir la confirmación
-    es_valido, mensaje = fg.validar_restricciones_inteligentes(
+    es_valido, mensaje = fg.val_restricc(
         personal_contratado,
         servicios_elegidos,
         lugar_seleccionado,

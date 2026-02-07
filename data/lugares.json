@@ -9,7 +9,13 @@
             "P\u00e9rgola de ceremonias",
             "Iluminaci\u00f3n ambiental en \u00e1rboles"
         ],
-        "fechas_ocupadas": []
+        "fechas_ocupadas": [
+            {
+                "fecha": "12/09/2028",
+                "inicio": "12:00",
+                "fin": "18:00"
+            }
+        ]
     },
     {
         "id_lugar": 11,
