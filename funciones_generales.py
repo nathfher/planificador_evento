@@ -52,31 +52,44 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
     disponibles = []
     formato_hora = "%H:%M"
 
-    # 1. NORMALIZACIÓN DE BÚSQUEDA
-    busqueda = (tipo_buscado.lower().strip().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
-                )
+    # 1. NORMALIZACIÓN DE BÚSQUEDA (Tu lógica original)
+    busqueda = (tipo_buscado.lower().strip()
+                .replace("ú", "u").replace("í", "i").replace("á", "a")
+                .replace("é", "e").replace("ó", "o"))
 
     try:
         boda_inicio = datetime.strptime(h_ini, formato_hora).time()
         boda_fin = datetime.strptime(h_fin, formato_hora).time()
 
         for p in lista_personal:
+            # --- EL ESCUDO ANTICRASH ---
+            # Si 'p' no es un diccionario (es una lista o string), lo saltamos
+            if not isinstance(p, dict):
+                continue
+
             # 2. NORMALIZACIÓN DEL DATO DEL JSON
-            # Buscamos en 'categoria' o en 'oficio' para mayor seguridad
-            categoria_trabajador = p.get('categoria', p.get('oficio', '')).lower().replace("ú", "u").replace("í", "i").replace("á", "a").replace("é", "e").replace("ó", "o")
+            categoria_trabajador = p.get('categoria', p.get('oficio', '')).lower()
+            categoria_trabajador = (categoria_trabajador
+                                    .replace("ú", "u").replace("í", "i").replace("á", "a")
+                                    .replace("é", "e").replace("ó", "o"))
 
             if busqueda in categoria_trabajador:
 
-                # 3. FILTRO DE FECHA (Bloqueos totales por vacaciones/feriados)
+                # 3. FILTRO DE FECHA (Vacaciones/Feriados)
                 fechas_bloqueadas = p.get('fechas_ocupadas', [])
                 if fecha in fechas_bloqueadas:
                     continue
 
-                # 4. FILTRO DE HORARIO (Agenda del día)
+                # 4. FILTRO DE HORARIO (Tu lógica de intervalos)
+                # Buscamos en 'agenda' o 'reservas' según uses en tu JSON
                 agenda_dia = p.get('agenda', {}).get(fecha, [])
                 hay_conflicto = False
 
                 for intervalo in agenda_dia:
+                    # Validamos que el intervalo tenga las llaves necesarias
+                    if 'inicio' not in intervalo or 'fin' not in intervalo:
+                        continue
+
                     hora_ocu_ini = datetime.strptime(intervalo['inicio'], formato_hora).time()
                     hora_ocu_fin = datetime.strptime(intervalo['fin'], formato_hora).time()
 
@@ -86,12 +99,10 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha, h_ini, h_fin):
                         break
 
                 # 5. RESULTADO FINAL
-                # Debe estar FUERA del bucle 'for intervalo', pero DENTRO del 'if busqueda'
                 if not hay_conflicto:
                     disponibles.append(p)
 
     except (ValueError, TypeError, KeyError) as e:
-        # CORRECCIÓN: Usamos 'as e' para ver el error real, no el nombre de la variable buscada
         print(f"⚠️ Error técnico al validar disponibilidad: {e}")
         return []
 
