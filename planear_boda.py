@@ -109,13 +109,13 @@ def ejecutar_registro_boda():
     # --- PASO 2.1: REGISTRO DE FECHA ---
     while True:
         fecha_input = input("\nIngrese la fecha de la boda (DD/MM/AAAA): ")
+        hoy = datetime.now().date()
         try:
-            fecha_boda = datetime.strptime(fecha_input, "%d/%m/%Y")
-            if fecha_boda < datetime.now():
+            fecha_boda = datetime.strptime(fecha_input, "%d/%m/%Y").date()
+            if fecha_boda < hoy:
                 print("❌ No puedes elegir una fecha pasada. ¡Planificamos el futuro!")
                 continue
             # 2. Validar el límite de 2 años (Evita el año 2100)
-            hoy = datetime.now
             limite_futuro = hoy + timedelta(days=730) # 2 años aprox.
             if fecha_boda > limite_futuro:
                 print("⚠️ Error: No aceptamos reservas con más de 2 años de antelación.")
@@ -182,53 +182,73 @@ def ejecutar_registro_boda():
     # Fuera del bucle, confirmamos éxito
         horas_finales = (t_fin - t_ini).total_seconds() / 3600
         print(f"✅ Horario confirmado. Duración total: {horas_finales:.1f} horas.")
+        input("\nPresione Enter para continuar con la selección del lugar...")
 
-    # Este print va FUERA del while, cuando ya todo es válido
-    print(f"✅ Duración confirmada: {diferencia.total_seconds()/3600:.1f} horas.")
-    input("\nPresione Enter para continuar a la selección de lugar...")
-    # --- PASO 3: SELECCIÓN DE LUGAR ---
-    fg.limpiar_pantalla()
+# --- PASO 3: SELECCIÓN DE LUGAR (Dentro de un bucle de reintento) ---
+    while True:
+        fg.limpiar_pantalla()
+        print(f"{'='*60}\n{'CATÁLOGO DE SALONES DISPONIBLES'.center(60)}\n{'='*60}")
 
-    # 1. OBTENER DISPONIBILIDAD REAL (Fecha + Horario + Capacidad)
-    lugares_libres, sugerencias = fg.get_lugares_disponibles(
-        fecha_str, lista_lugares, h_ini, h_fin, invitados_val
-    )
+        # 1. OBTENER DISPONIBILIDAD REAL
+        lugares_libres, sugerencias = fg.get_lugares_disponibles(
+            fecha_str, lista_lugares, h_ini, h_fin, invitados_val
+        )
 
-    # 2. VALIDAR SI HAY OPCIONES DISPONIBLES
-    if not lugares_libres:
-        print(f"❌ No hay lugares disponibles para el {fecha_str} a esa hora.")
-        if sugerencias:
-            print("\n💡 SUGERENCIAS DEL SISTEMA INTELIGENTE:")
-            for sug in sugerencias:
-                print(f"   -> El lugar '{sug['nombre']}' está libre el día {sug['fecha']}")
-        print("\nIntente con otra fecha o reduzca el número de invitados.")
-        input("Presione Enter para volver al menú...")
-        return
+        # 2. VALIDAR SI NO HAY OPCIONES
+        if not lugares_libres:
+            print(f"\n❌ No hay lugares disponibles para el {fecha_str} a las {h_ini}.")
+            if sugerencias:
+                print("\n💡 SUGERENCIAS EN OTRAS FECHAS:")
+                for sug in sugerencias:
+                    print(f"   -> '{sug['nombre']}' disponible el día {sug['fecha']}")
 
-    # 3. MOSTRAR LA TABLA DE LUGARES APTOS Y LIBRES
-    # --- PASO 3: SELECCIÓN DE LUGAR ---
-    fg.limpiar_pantalla()
-    print("="*60)
-    print("           CATÁLOGO DE SALONES DISPONIBLES           ".center(60))
-    print("="*60)
+            print("\n¿Qué desea hacer?")
+            print("1. Cambiar fecha/hora o invitados (Reintentar)")
+            print("2. Cancelar y volver al menú principal")
+            opc = input("Seleccione una opción: ")
 
-    # Imprimimos los lugares como "fichas descriptivas"
-    for l in lugares_libres: 
-        print(f"ID: {str(l['id_lugar']).ljust(3)} | 🏛️  {l['nombre'].upper()}")
-        print(f"      👥 Capacidad: {str(l['capacidad']).rjust(3)} pers. | 💰 Precio: ${l['precio']:>8.2f}")
-        
-        # Le damos vida a los servicios incluidos para que el usuario los vea ANTES de elegir
-        if l.get('servicios_incluidos'):
-            servicios_str = ", ".join(l['servicios_incluidos'])
-            print(f"      🎁 Incluye: {servicios_str}")
-        
-        # Aviso inteligente de piscina si existe en el nombre o servicios
-        if "piscina" in l['nombre'].lower() or any("piscina" in s.lower() for s in l.get('servicios_incluidos', [])):
-            print("      ⚠️  NOTA: Este lugar requiere personal de SEGURIDAD obligatorio.")
-            
-        print("-" * 60)
+            if opc == '1':
+                fecha_input = input("Nueva fecha (DD/MM/AAAA): ")
+                # Aquí podrías meter la validación de fecha que hicimos antes
+                fecha_str = fecha_input
+                invitados_val = int(input("Nueva cantidad de invitados: "))
+                continue  # <--- Ahora sí funciona: vuelve al inicio del while
+            else:
+                return # Sale al menú principal
+
+        # 3. SI HAY LUGARES, MOSTRAR FICHAS DESCRIPTIVAS
+        for l in lugares_libres:
+            print(f"ID: {str(l['id_lugar']).ljust(3)} | 🏛️  {l['nombre'].upper()}")
+            print(f"      👥 Capacidad: {str(l['capacidad']).rjust(3)} pers. | 💰 Precio: ${l['precio']:>8.2f}")
+
+            if l.get('servicios_incluidos'):
+                servicios_str = ", ".join(l['servicios_incluidos'])
+                print(f"      🎁 Incluye: {servicios_str}")
+
+            if "piscina" in l['nombre'].lower() or any("piscina" in s.lower() for s in l.get('servicios_incluidos', [])):
+                print("      ⚠️  NOTA: Este lugar requiere personal de SEGURIDAD obligatorio.")
+
+            print("-" * 60)
+
+        # 4. SELECCIÓN FINAL
+        try:
+            id_selec = int(input("\nIngrese el ID del lugar que desea reservar: "))
+            # Buscamos el lugar por ID dentro de los que están libres
+            lugar_elegido = next((lug for lug in lugares_libres if lug['id_lugar'] == id_selec), None)
+
+            if lugar_elegido:
+                print(f"✅ ¡'{lugar_elegido['nombre']}' seleccionado con éxito!")
+                input("Presione Enter para continuar al personal...")
+                break # <--- Rompe el while y pasa al Paso 4
+            else:
+                print("❌ El ID ingresado no está en la lista de lugares disponibles.")
+                input("Presione Enter para intentar de nuevo...")
+        except ValueError:
+            print("❌ Por favor, ingrese un número de ID válido.")
+            input("Presione Enter para intentar de nuevo...")
 
     # --- 4. BUCLE DE SELECCIÓN Y VALIDACIÓN ---
+    presupuesto_provisional = cliente_actual.presupuesto
     lugar_elegido = None
     while lugar_elegido is None:
         try:
@@ -270,59 +290,82 @@ def ejecutar_registro_boda():
     personal_contratado = []
     servicios_elegidos = []
 
-# --- PASO 3: CONTRATACIÓN DE PERSONAL ---
+        # --- PASO 4: CONTRATACIÓN DE PERSONAL ---
     while True:
         fg.limpiar_pantalla()
-        print(f"--- PASO 3: PERSONAL (Dinero disponible: ${presupuesto_provisional:,.2f}) ---")
+    # Mostramos quiénes ya están en el equipo para no perder la cuenta
+        equipo_nombres = [p.nombre for p in personal_contratado]
+        print(f"--- PASO 4: PERSONAL (Disponible: ${presupuesto_provisional:,.2f}) ---")
+        print(f"Equipo actual: {', '.join(equipo_nombres) if equipo_nombres else 'Ninguno'}")
 
         mensaje_prompt = ("\n¿Qué oficio busca? (Fotografia, Seguridad, Estetica, "
-                        "Planificador, Flores, Iluminacion, Barman / '0' para finalizar): "
-)
+                      "Planificador, Flores, Iluminacion, Barman / '0' para finalizar): ")
         tipo = input(mensaje_prompt).lower().strip()
 
         if tipo == '0':
-            # Validación inmediata de Seguridad si hay piscina
-            tiene_piscina = "piscina" in lugar_elegido['nombre'].lower() or any("piscina" in s.lower() for s in lugar_elegido.get('servicios_incluidos', []))
+        # Validación de Seguridad/Piscina
+            tiene_piscina = "piscina" in lugar_elegido['nombre'].lower() or \
+                any("piscina" in s.lower() for s in lugar_elegido.get('servicios_incluidos', []))
             tiene_seguridad = any("seguridad" in p.oficio.lower() for p in personal_contratado)
 
             if tiene_piscina and not tiene_seguridad:
-                print("\n❌ BLOQUEO DE SEGURIDAD: El lugar tiene piscina. DEBE contratar Seguridad.")
+                print("\n❌ BLOQUEO: El lugar tiene piscina. DEBE contratar Seguridad.")
                 input("Presione Enter para volver...")
                 continue
             break
+
         oficios_validos = ["fotografia", "seguridad", "estetica", "planificador", "flores", "iluminacion", "barman"]
         if tipo not in oficios_validos:
-            print(f"❌ '{tipo}' no es válido. Opciones: {', '.join(oficios_validos)}")
+            print(f"❌ '{tipo}' no es válido.")
             input("Presione Enter...")
             continue
 
+    # Búsqueda real de disponibles
         pers_libres = fg.get_personal_disponible(tipo, lista_personal, fecha_str, h_ini, h_fin)
+
         if not pers_libres:
-            print(f"❌ No hay {tipo} disponible.")
+            print(f"❌ No hay {tipo} disponible para esa fecha/hora.")
             input("Presione Enter...")
             continue
 
         fg.imprimir_tabla_personal(pers_libres)
+
         try:
             id_p = int(input(f"ID del {tipo} a contratar (0 para volver): "))
-            if id_p == 0: 
+            if id_p == 0:
                 continue
-            dict_p = fg.contratar_personal(lista_personal, id_p)
+
+        # CAMBIO CLAVE: Buscar solo entre los que están LIBRES
+            dict_p = fg.buscar_elemento_id(id_p, pers_libres, 'id_personal')
 
             if dict_p:
                 sueldo_p = dict_p['sueldo']
+            # Evitar duplicados
                 if any(p.id_personal == dict_p['id_personal'] for p in personal_contratado):
-                    print("⚠️ Ya contratado.")
+                    print("⚠️ Este trabajador ya está en tu equipo.")
                 elif sueldo_p > presupuesto_provisional:
-                    print(f"❌ Dinero insuficiente. Falta: ${sueldo_p - presupuesto_provisional:,.2f}")
+                    print(f"❌ Presupuesto insuficiente. Falta: ${sueldo_p - presupuesto_provisional:,.2f}")
                 else:
+                # Si todo está ok, contratamos
                     presupuesto_provisional -= sueldo_p
-                    personal_contratado.append(Personal(dict_p['id_personal'], dict_p['nombre'], dict_p['oficio'], sueldo_p, dict_p.get('experiencia', 'Estándar')))
-                    print(f"✅ CONFIRMADO: {dict_p['nombre']}.")
-                input("\nPresione Enter...")
+                # Creamos el objeto (Asegúrate que 'Personal' esté importado)
+                    nuevo_socio = Personal(
+                        dict_p['id_personal'],
+                        dict_p['nombre'],
+                        dict_p['oficio'],
+                        sueldo_p,
+                        dict_p.get('experiencia', 'Estándar')
+                    )
+                    personal_contratado.append(nuevo_socio)
+                    print(f"✅ CONFIRMADO: {dict_p['nombre']} se une a la boda.")
+            else:
+                print("❌ ID no válido o el trabajador no está disponible.")
+
+            input("\nPresione Enter para continuar...")
+
         except ValueError:
-            print("⚠️ Error: Use solo números.")
-            input("Presione Enter...") # PAUSA 4
+            print("⚠️ Error: Ingrese un número de ID válido.")
+            input("Presione Enter...")
     # --- PASO 4: INVENTARIO CON VALIDACIÓN BLOQUEANTE ---
     tiene_florista = any(p.oficio.lower() == "flores" for p in personal_contratado)
     tiene_iluminador = any(p.oficio.lower() == "iluminacion" for p in personal_contratado)
