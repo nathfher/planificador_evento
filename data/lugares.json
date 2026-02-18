@@ -2,7 +2,7 @@
     {
         "id_lugar": 10,
         "nombre": "Jardin de los Cerezos",
-        "capacidad": 150,
+        "capacidad": 250,
         "precio": 1500,
         "servicios_incluidos": [
             "Fuente de agua iluminada",
@@ -26,7 +26,7 @@
     {
         "id_lugar": 12,
         "nombre": "Terraza del Sol",
-        "capacidad": 80,
+        "capacidad": 180,
         "precio": 1000,
         "servicios_incluidos": [
             "Iluminacion Guirnalda (Fairytale Lights)",

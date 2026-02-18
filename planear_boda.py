@@ -54,75 +54,76 @@ def ejecutar_registro_boda():
     while True:
         name_client = input("Ingrese nombre completo: ").strip()
 
-        # 1. Verificamos que no esté vacío después del strip
         if not name_client:
             print("⚠️ El nombre no puede estar vacío.")
             continue
 
-        # 2. Reemplazamos espacios para validar solo letras
-        # Esto permite nombres como "Raquel García" pero bloquea "Raquel_García"
+        # Preparación para validaciones
         palabras = name_client.lower().split()
         solo_letras = name_client.replace(" ", "")
-        # --- NUEVAS VALIDACIONES ---
 
         # A. Evitar palabras repetidas (ej: "pedro pedro pedro")
-        repetida = False
-        for p in palabras:
-            if palabras.count(p) > 2: # Si una palabra está más de 2 veces
-                repetida = True
-                break
+        repetida = any(palabras.count(p) > 2 for p in palabras)
 
-        # B. Evitar "disparates" (muchas consonantes juntas)
-        # Si hay más de 4 consonantes seguidas, probablemente es basura
-
+        # B. Evitar "disparates" (Regex para 5 o más consonantes seguidas)
         tiene_basura = re.search(r'[^aeiouáéíóúü\s]{5,}', name_client.lower())
 
+        # --- VALIDACIÓN ÚNICA (ORDENADA) ---
         if len(name_client) < 8:
-            print("⚠️ Nombre demasiado corto.")
+            print("⚠️ Nombre demasiado corto (mín. 8 caracteres).")
         elif not solo_letras.isalpha():
-            print("⚠️ Solo se permiten letras.")
+            print("⚠️ Solo se permiten letras y espacios.")
         elif repetida:
-            print("⚠️ No repitas tanto la misma palabra, ingresa un nombre real.")
+            print("⚠️ Nombre inválido: demasiadas palabras repetidas.")
         elif tiene_basura:
-            print("⚠️ El nombre parece inválido (demasiadas letras aleatorias).")
+            print("⚠️ El nombre parece inválido (letras aleatorias detectadas).")
         else:
-            # Si pasa todo, lo ponemos bonito (Primera Letra Mayúscula)
+            # ÉXITO: Formateamos y salimos
             name_client = name_client.title()
             break
-
-        # 3. Validaciones combinadas:
-        if len(name_client) < 8:
-            print("⚠️ Nombre demasiado corto. Debe tener mín. 8 caracteres.")
-        elif not solo_letras.isalpha():
-            print("⚠️ Nombre inválido. No use números, guiones ni símbolos (solo letras).")
-        else:
-            # Si pasa todo, salimos
-            break
-    # 3. VALIDAR CORREO
+    # # 3. VALIDAR CORREO
     while True:
         correo_temp = input("Ingrese correo (@gmail.com): ").lower().strip()
 
         if " " in correo_temp:
-            print("❌ El correo no puede contener espacios. Escríbalo todo junto.")
+            print("❌ El correo no puede contener espacios.")
             continue
 
-        # Verificamos que tenga un '@', que termine en '@gmail.com'
-        # y que haya algo antes del '@'
-        if "@gmail.com" in correo_temp and correo_temp.endswith("@gmail.com"):
-            # Extraemos la parte antes del @ para ver si es válida
+        if correo_temp.endswith("@gmail.com"):
             usuario = correo_temp.split('@')[0]
-            # Si el usuario tiene 5 o más consonantes seguidas, es sospechoso
+
+            # --- NUEVAS VALIDACIONES DE SEGURIDAD ---
+
+            # 1. Detectar símbolos repetidos (ej: "......" o "------")
+            simbolos_repetidos = re.search(r'[\._-]{2,}', usuario)
+
+            # 2. Detectar si empieza o termina con un símbolo (inválido en Gmail)
+            borde_invalido = (
+                usuario.startswith(('.', '-', '_')) or
+                usuario.endswith(('.', '-', '_'))
+            )
+
+            # 3. Detectar caracteres no permitidos ( puntos, guiones y guiones bajos)
+            caracteres_prohibidos = re.search(r'[^a-z0-9\._-]', usuario)
+
+            # 4. Tu validación de "basura" (consonantes seguidas)
             es_basura = re.search(r'[^aeiou0-9]{5,}', usuario)
+
             if len(usuario) < 4:
-                print("❌ El nombre de usuario del correo es muy corto.")
+                print("❌ El nombre de usuario del correo es muy corto (mín. 4 caracteres).")
+            elif simbolos_repetidos:
+                print("❌ El correo no puede tener puntos o guiones seguidos.")
+            elif borde_invalido:
+                print("❌ El correo no puede empezar ni terminar con símbolos.")
+            elif caracteres_prohibidos:
+                print("❌ El correo contiene caracteres no permitidos.")
             elif es_basura:
-                print("❌ El correo parece inválido (demasiadas letras aleatorias).")
+                print("❌ El correo parece generado aleatoriamente (basura).")
             else:
-                # Si pasa todo, salimos
+                # ÉXITO
                 break
         else:
-            print("❌ Correo inválido. Asegúrese de que termine exactamente en @gmail.com")
-
+            print("❌ Debe ser una dirección válida que termine en @gmail.com")
 # 4. VALIDAR INVITADOS (Con lógica de evento real)
     while True:
         try:
@@ -182,7 +183,7 @@ def ejecutar_registro_boda():
     cliente_actual = Cliente(id_client, name_client, correo_temp, invitados_val, presupuesto_val)
     presupuesto_provisional = cliente_actual.presupuesto # variable temporal
     fecha_boda = None
-
+    input("\nPresione Enter para continuar con el registro de la fecha...")
     # --- PASO 2.1: REGISTRO DE FECHA ---
     while True:
         fecha_input = input("\nIngrese la fecha de la boda (DD/MM/AAAA): ")
@@ -400,7 +401,7 @@ def ejecutar_registro_boda():
             continue
 
         # 4. BÚSQUEDA DE DISPONIBLES
-        pers_libres = fg.get_personal_disponible(tipo, lista_personal, fecha_str, h_ini, h_fin)
+        pers_libres = fg.get_personal_disponible(tipo, lista_personal, fecha_str)
 
         if not pers_libres:
             print(f"\n❌ No hay personal de {tipo.upper()} disponible para el {fecha_str}.")
