@@ -1,5 +1,4 @@
 [
-    [
     {
         "id_personal": 100,
         "nombre": "Ana Fotografa",
@@ -180,5 +179,4 @@
         "experiencia": "Estándar",
         "fechas_ocupadas": []
     }
-]
 ]

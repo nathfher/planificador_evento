@@ -152,7 +152,7 @@ def ejecutar_registro_boda():
 # 5. VALIDAR PRESUPUESTO
     while True:
         try:
-            presupuesto_val = float(input("¿Presupuesto máximo? (Mínimo $3000): "))
+            presupuesto_val = float(input("¿Presupuesto máximo? (Mínimo $4000): "))
 
             # 1. Filtro de números negativos (La muela de coherencia)
             if presupuesto_val < 0:
@@ -461,41 +461,35 @@ def ejecutar_registro_boda():
     for cat in categorias_inv:
         while True:
             fg.limpiar_pantalla()
-            # Guardamos el presupuesto antes de empezar la categoría por si hay que resetear
             presupuesto_antes_de_cat = presupuesto_provisional
-            items_en_esta_ronda = [] # Temporal para esta categoría
+            items_en_esta_ronda = []
 
             print(f"{'='*60}\n{f'PASO 4: {cat.upper()}'.center(60)}\n{'='*60}")
             print(f"💰 Presupuesto para esta sección: ${presupuesto_provisional:,.2f}")
-
-            if cat == "decoracion":
-                if tiene_florista:
-                    print("🌸 NOTA: Tiene Florista. Debe incluir flores.")
-                if tiene_iluminador:
-                    print("💡 NOTA: Tiene Iluminador. Debe incluir luces.")
 
             items_categoria = [i for i in lista_inventario if i.get('categoria') == cat]
             if not items_categoria:
                 break
 
-            # Mostrar tabla
+            # --- TABLA DE PRODUCTOS ---
             print(f"\n{'ID':<6} | {'PRODUCTO':<25} | {'PRECIO':<10} | {'STOCK'}")
             print("-" * 60)
             for item in items_categoria:
-                # 1. Definimos el formato en una variable (así la línea es corta)
-                formato_tabla = "{:<6} | {:<25} | ${:<9.2f} | {}"
+# Usando f-strings (el estándar actual de Python)
+                # 1. Defines el "molde" una sola vez antes del bucle (o dentro)
+                formato = "{{:<6}} | {{:<25}} | ${{:<9.2f}} | {{}}"
 
-            # 2. Usamos .format() pasando los datos uno por uno
-                print(formato_tabla.format(
-                    item['id_item'],
-                    item['nombre'],
-                    item['precio_unidad'],
-                    item['cantidad']
-                    ))
+# 2. En el print solo pasas los datos
+                print(formato.format(
+                        item['id_item'],
+                        item['nombre'],
+                        item['precio_unidad'],
+                        item['cantidad']
+                        ))
 
-            # Bucle de selección de productos
+            # Bucle de selección
             while True:
-                op = input(f"\nID de {cat} (o '0' para finalizar categoría): ").strip()
+                op = input(f"\nID de {cat} (o '0' para finalizar selección): ").strip()
                 if op == '0':
                     break
 
@@ -507,15 +501,6 @@ def ejecutar_registro_boda():
                         print("❌ ID no válido.")
                         continue
 
-                    # --- VALIDACIONES DE CONFLICTO ---
-                    nombre_n = seleccionado['nombre'].lower()
-                    if "rock" in nombre_n and tiene_dj:
-                        print("❌ Conflicto: Ya tiene un DJ, no puede contratar Banda de Rock.")
-                        continue
-                    if "mariachi" in nombre_n and "cristal" in lugar_elegido['nombre'].lower():
-                        print("❌ El Palacio de Cristal no permite Mariachis por acústica.")
-                        continue
-
                     cant = int(input(f"¿Unidades de '{seleccionado['nombre']}'?: "))
                     if cant <= 0:
                         continue
@@ -523,60 +508,78 @@ def ejecutar_registro_boda():
                     costo = seleccionado['precio_unidad'] * cant
 
                     if seleccionado['cantidad'] < cant:
-                        print(f"❌ Stock insuficiente. Solo hay "
-                              f"{seleccionado['cantidad']} disponibles.")
+                        print("❌ Stock insuficiente.")
                     elif costo > presupuesto_provisional:
-                        falta = costo - presupuesto_provisional
-                        print(f"❌ Presupuesto insuficiente. "
-                              f"Falta: ${falta:,.2f}")
+                        print("❌ Presupuesto insuficiente.")
                     else:
                         presupuesto_provisional -= costo
-                        item_reserva = ItemReserva(
-                            seleccionado['id_item'],
-                            seleccionado['nombre'],
-                            seleccionado['precio_unidad'],
-                            cant
-                        )
-                        items_en_esta_ronda.append(item_reserva)
-                        print(f"✅ Añadido: {seleccionado['nombre']} x{cant}. "
-                              f"Restante: ${presupuesto_provisional:,.2f}")
-
+                        items_en_esta_ronda.append(ItemReserva(
+                            seleccionado['id_item'], seleccionado['nombre'],
+                            seleccionado['precio_unidad'], cant
+                        ))
+                        print(f"✅ Añadido: {seleccionado['nombre']} x{cant}")
                 except ValueError:
-                    print("⚠️ Error: Ingrese números válidos.")
+                    print("⚠️ Ingrese números válidos.")
 
-            # --- VALIDACIÓN DE SALIDA (BLOQUEO LÓGICO) ---
+            # --- VALIDACIÓN BLOQUEANTE ---
             cumple_requisitos = True
-
-            # Unimos lo comprado en esta ronda a la lista general para validar
             servicios_totales_temp = servicios_elegidos + items_en_esta_ronda
+            nombres_comprados = [i.nombre.lower() for i in servicios_totales_temp]
 
+            # VALIDACIÓN DE MOBILIARIO (Ya la tienes)
             if cat == "mobiliario":
-                cant_sillas = sum(
-                item.cantidad_requerida
-                for item in servicios_totales_temp
-                if "silla" in item.nombre.lower()
-            )
+                # 1. Extraemos las cantidades en una línea corta
+                sillas_pedidas = [i.cantidad_requerida for i in servicios_totales_temp
+                                 if "silla" in i.nombre.lower()]
+                mesas_pedidas = [i.cantidad_requerida for i in servicios_totales_temp
+                                 if "mesa" in i.nombre.lower()]
+
+                # 2. Sumamos el resultado
+                cant_sillas = sum(sillas_pedidas)
+                cant_mesas = sum(mesas_pedidas)
+
+                # 3. Validación
                 sillas_min = int(cliente_actual.invitados * 0.8)
                 if cant_sillas < sillas_min:
-                    print(f"\n❌ SEGURIDAD: Faltan sillas. Necesita al menos "
-                      f"{sillas_min} (tiene {cant_sillas}).")
+                    print(f"\n❌ ERROR: Faltan sillas ({cant_sillas}/{sillas_min}).")
+                    cumple_requisitos = False
+                if cant_sillas < int(cliente_actual.invitados * 0.8):
+                    print("\n❌ ERROR: Faltan sillas.")
                     cumple_requisitos = False
 
-            if cat == "decoracion" and tiene_florista:
-                if not any("flor" in item.nombre.lower() for item in servicios_totales_temp):
-                    print("\n❌ LOGÍSTICA: Tiene Florista pero no ha comprado flores.")
+                if cant_mesas <= 0:
+                    print("\n❌ ERROR: No ha seleccionado ninguna mesa.")
                     cumple_requisitos = False
 
+            # 2. VALIDACIÓN DE TECNOLOGÍA (DJ)
+            elif cat == "tecnologia" and tiene_dj:
+                # Extraemos la búsqueda a una variable para acortar el if
+                tiene_sonido = any("altavoz" in n or "sonido" in n for n in nombres_comprados)
+                if not tiene_sonido:
+                    print("\n❌ LOGÍSTICA: Tiene DJ pero falta equipo de sonido.")
+                    cumple_requisitos = False
+
+            # 3. VALIDACIÓN DE DECORACIÓN (Florista e Iluminador)
+            elif cat == "decoracion":
+                if tiene_florista:
+                    compro_flores = any("flor" in n for n in nombres_comprados)
+                    if not compro_flores:
+                        print("\n❌ LOGÍSTICA: Tiene Florista pero no compró flores.")
+                        cumple_requisitos = False
+                if tiene_iluminador:
+                    tiene_luces = any("luz" in n or "foco" in n for n in nombres_comprados)
+                    if not tiene_luces:
+                        print("\n❌ LOGÍSTICA: Tiene Iluminador pero no compró luces.")
+                        cumple_requisitos = False
+
+            # --- DECISIÓN FINAL DE LA CATEGORÍA ---
             if cumple_requisitos:
-                # Si todo está bien, consolidamos la compra
                 servicios_elegidos.extend(items_en_esta_ronda)
-                break
+                break # Rompe el 'while True' de la categoría y pasa a la siguiente
             else:
-                # ROLLBACK: Si no cumple, reseteamos el dinero y la lista de esta ronda
-                print("⚠️ Reintentando categoría... "
-                    "Se ha restaurado su presupuesto de esta sección.")
+                print("\n⚠️ SECCIÓN REINICIADA: Debe cumplir los requisitos mínimos.")
                 presupuesto_provisional = presupuesto_antes_de_cat
-                input("Presione Enter para volver a intentar...")
+                input("Presione Enter para volver a intentar esta categoría...")
 
 # --- PASO 5: CÁLCULOS Y COTIZACIÓN ---
     # build_cotizacion genera el objeto/diccionario con todos los costos
