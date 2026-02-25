@@ -50,7 +50,7 @@ def hay_conflicto_horario(lista_reservas, fecha_nueva, h_ini_nueva, h_fin_nueva)
 
 def get_personal_disponible(tipo_buscado, lista_personal, fecha):
     disponibles = []
-    
+
     # 1. NORMALIZACIÓN DE LA BÚSQUEDA
     busqueda = (tipo_buscado.lower().strip()
                 .replace("ú", "u").replace("í", "i").replace("á", "a")
@@ -58,7 +58,7 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha):
 
     for p in lista_personal:
         # Escudo por si el elemento no es un diccionario
-        if not isinstance(p, dict): 
+        if not isinstance(p, dict):
             continue
 
         # 2. OBTENER CATEGORÍA (Priorizando 'categoria' que es la de tu JSON)
@@ -68,11 +68,11 @@ def get_personal_disponible(tipo_buscado, lista_personal, fecha):
 
         # Si el oficio coincide con lo que buscamos (ej: "barman" en "barman")
         if busqueda in oficio:
-            
+
             # 3. FILTRO DE FECHA (El único que necesitas ahora)
             # Si la fecha de la boda está en la lista de días ocupados, NO está disponible
             fechas_bloqueadas = p.get('fechas_ocupadas', [])
-            
+
             if fecha not in fechas_bloqueadas:
                 # Si no está en la lista negra, ¡pasa el filtro!
                 disponibles.append(p)
@@ -374,44 +374,39 @@ def ver_historial():
     input("Presione Enter para volver al menú principal...")
 
 def val_restricc(personal_contratado, servicios_elegidos, lugar_seleccionado, num_invitados):
-    """
-    Valida que la logística de la boda sea coherente según el personal, 
-    objetos elegidos, lugar y cantidad de invitados.
-    """
+    # Extraemos los oficios y nombres de servicios de forma limpia
     oficios_p = [p.oficio.lower().strip() for p in personal_contratado]
-    # Usamos .nombre si son objetos de clase ItemReserva, o ['nombre'] si son diccionarios
     nombres_s = [s.nombre.lower().strip() for s in servicios_elegidos]
     nombre_lug = lugar_seleccionado['nombre'].lower()
 
-    # 1. USO DE num_invitados: Validación de Sillas (Mínimo 80% de los invitados)
+    # 1 y 2. VALIDACIÓN DE MOBILIARIO (Sillas y Mesas)
     cant_sillas = sum(s.cantidad_requerida for s in servicios_elegidos if "silla" in s.nombre.lower())
     sillas_min = int(num_invitados * 0.8)
     if cant_sillas < sillas_min:
         return False, f"Mobiliario insuficiente: Tiene {cant_sillas} sillas para {num_invitados} invitados (Mín. {sillas_min})."
 
-    # 2. USO DE num_invitados: Validación de Mesas (1 cada 10 invitados)
     cant_mesas = sum(s.cantidad_requerida for s in servicios_elegidos if "mesa" in s.nombre.lower())
     mesas_min = int(num_invitados / 10)
     if num_invitados > 0 and cant_mesas < mesas_min:
         return False, f"Mobiliario insuficiente: Tiene {cant_mesas} mesas para {num_invitados} invitados (Mín. {mesas_min})."
 
-    # 3. Coherencia de Barra
+    # 3. COHERENCIA DE BARRA
     if any("cocteleria" in s or "barra libre" in s for s in nombres_s):
-        if not any(o in ["barman", "sommelier"] for o in oficios_p):
+        # Cambio: Buscamos si la palabra barman  existe dentro de algún oficio
+        if not any("barman" in o for o in oficios_p):
             return False, "La 'Barra Libre' requiere contratar personal de 'Barman' o 'Sommelier'."
 
-    # 4. Requerimiento de Audio Profesional
+    # 4. AUDIO PROFESIONAL
     necesita_audio = any(m in s for s in nombres_s for m in ["dj", "rock", "banda", "mariachi"])
     tiene_equipo = any("sonido" in s or "parlante" in s for s in nombres_s)
     if necesita_audio and not tiene_equipo:
         return False, "Música detectada: Es obligatorio incluir 'Equipo de Sonido Profesional'."
 
-    # 5. Piscina y Seguridad (Obligatorio)
-    # Revisa tanto el nombre del lugar como los servicios incluidos en el JSON
+    # 5. PISCINA Y SEGURIDAD (Aquí es donde estaba el fallo)
     tiene_piscina = "piscina" in nombre_lug or any("piscina" in serv.lower() for serv in lugar_seleccionado.get('servicios_incluidos', []))
     if tiene_piscina:
-        if "seguridad" not in oficios_p:
+        # Cambio profesional: Usamos "any" con búsqueda parcial para evitar errores de texto
+        if not any("seguridad" in o for o in oficios_p):
             return False, f"El lugar '{lugar_seleccionado['nombre']}' tiene piscina y requiere personal de 'Seguridad'."
 
-    # Si todo pasa, devolvemos True y string vacío
     return True, ""

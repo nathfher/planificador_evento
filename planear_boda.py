@@ -67,6 +67,7 @@ def ejecutar_registro_boda():
 
         # B. Evitar "disparates" (Regex para 5 o más consonantes seguidas)
         tiene_basura = re.search(r'[^aeiouáéíóúü\s]{5,}', name_client.lower())
+        letras_locas = re.search(r'(.)\1{3,}', name_client.lower())
 
         # --- VALIDACIÓN ÚNICA (ORDENADA) ---
         if len(name_client) < 8:
@@ -77,6 +78,8 @@ def ejecutar_registro_boda():
             print("⚠️ Nombre inválido: demasiadas palabras repetidas.")
         elif tiene_basura:
             print("⚠️ El nombre parece inválido (letras aleatorias detectadas).")
+        elif letras_locas:
+            print("⚠️ El nombre contiene demasiadas letras repetidas seguidas.")
         else:
             # ÉXITO: Formateamos y salimos
             name_client = name_client.title()
@@ -503,7 +506,7 @@ def ejecutar_registro_boda():
 
         # --- PASO 5: CÁLCULOS Y VALIDACIÓN FINAL ---
         cotizacion = fg.build_cotizacion(
-            cliente_actual, lugar_elegido, personal_contratado, 
+            cliente_actual, lugar_elegido, personal_contratado,
             servicios_elegidos, fecha_str, h_ini, h_fin
         )
 
